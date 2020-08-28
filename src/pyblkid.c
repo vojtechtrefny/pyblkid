@@ -26,10 +26,10 @@ static PyMethodDef BlkidMethods[] = {
 
 static struct PyModuleDef blkidmodule = {
     PyModuleDef_HEAD_INIT,
-    "blkid",
-    "Python interface for the libblkid C library",
-    -1,
-    BlkidMethods
+    .m_name = "blkid",
+    .m_doc = "Python interface for the libblkid C library",
+    .m_size = -1,
+    .m_methods = BlkidMethods,
 };
 
 PyMODINIT_FUNC PyInit_blkid (void) {

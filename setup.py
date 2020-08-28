@@ -25,7 +25,8 @@ def main():
                                  sources = ["src/pyblkid.c"],
                                  include_dirs = ["/usr/include"],
                                  libraries = ["blkid"],
-                                 library_dirs = ["/usr/lib"])])
+                                 library_dirs = ["/usr/lib"],
+                                 extra_compile_args = ["-Wall", "-Wextra", "-Werror"])])
 
 if __name__ == "__main__":
     main()
