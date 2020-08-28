@@ -25,6 +25,7 @@
 typedef struct {
     PyObject_HEAD
     blkid_probe probe;
+    int fd;
 } ProbeObject;
 
 extern PyTypeObject ProbeType;

@@ -19,6 +19,9 @@
 #include "probe.h"
 
 #include <blkid/blkid.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <stdbool.h>
 
 #define UNUSED __attribute__((unused))
 
@@ -26,8 +29,10 @@
 PyObject *Probe_new (PyTypeObject *type,  PyObject *args UNUSED, PyObject *kwargs UNUSED) {
     ProbeObject *self = (ProbeObject*) type->tp_alloc (type, 0);
 
-    if (self)
+    if (self) {
         self->probe = NULL;
+        self->fd = -1;
+    }
 
     return (PyObject *) self;
 }
@@ -50,12 +55,262 @@ void Probe_dealloc (ProbeObject *self) {
         /* if init fails */
         return;
 
+    if (self->fd > 0)
+        close (self->fd);
+
     blkid_free_probe (self->probe);
     Py_TYPE (self)->tp_free ((PyObject *) self);
 }
 
+PyDoc_STRVAR(Probe_set_device__doc__,
+"set_device (device, flags=os.O_RDONLY|os.O_CLOEXEC, offset=0, size=0)\n\n"
+"Assigns the device to probe control struct, resets internal buffers and resets the current probing.\n\n"
+"'flags' define flags for the 'open' system call. By default the device will be opened as read-only.\n"
+"'offset' and 'size' specify begin and size of probing area (zero means whole device/file)");
+static PyObject *Probe_set_device (ProbeObject *self, PyObject *args, PyObject *kwargs) {
+    int ret = 0;
+    char *kwlist[] = { "device", "offset", "size", NULL };
+    char *device = NULL;
+    blkid_loff_t offset = 0;
+    blkid_loff_t size = 0;
+    int flags = O_RDONLY|O_CLOEXEC;
+
+    if (!PyArg_ParseTupleAndKeywords (args, kwargs, "s|iKK", kwlist, &device, &flags, &offset, &size)) {
+        PyErr_SetString (PyExc_AttributeError, "Failed to parse arguments");
+        return NULL;
+    }
+
+    self->fd = open (device, flags);
+    if (self->fd == -1) {
+        PyErr_Format (PyExc_OSError, "Failed to open device '%s': %s", device, strerror (errno));
+        return NULL;
+    }
+
+    ret = blkid_probe_set_device (self->probe, self->fd, offset, size);
+    if (ret != 0) {
+        PyErr_SetString (PyExc_RuntimeError, "Failed to set device");
+        return NULL;
+    }
+
+    Py_RETURN_NONE;
+}
+
+PyDoc_STRVAR(Probe_enable_superblocks__doc__,
+"enable_superblocks (enable)\n\n" \
+"Enables/disables the superblocks probing for non-binary interface.");
+static PyObject *Probe_enable_superblocks (ProbeObject *self, PyObject *args, PyObject *kwargs) {
+    int ret = 0;
+    bool enable = false;
+    char *kwlist[] = { "enable", NULL };
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "p", kwlist, &enable)) {
+        PyErr_SetString (PyExc_AttributeError, "Failed to parse arguments");
+        return NULL;
+    }
+
+    ret = blkid_probe_enable_superblocks (self->probe, enable);
+    if (ret != 0) {
+        PyErr_Format (PyExc_RuntimeError, "Failed to %s superblocks probing", enable ? "enable" : "disable");
+        return NULL;
+    }
+
+    Py_RETURN_NONE;
+}
+
+PyDoc_STRVAR(Probe_set_superblocks_flags__doc__,
+"set_superblocks_flags (flags)\n\n" \
+"Sets probing flags to the superblocks prober. This function is optional, the default are blkid.SUBLKS_DEFAULTS flags.\n"
+"Use blkid.SUBLKS_* constants for the 'flags' argument.");
+static PyObject *Probe_set_superblocks_flags (ProbeObject *self, PyObject *args, PyObject *kwargs) {
+    int ret = 0;
+    int flags = 0;
+    char *kwlist[] = { "flags", NULL };
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "i", kwlist, &flags)) {
+        PyErr_SetString (PyExc_AttributeError, "Failed to parse arguments");
+        return NULL;
+    }
+
+    ret = blkid_probe_set_superblocks_flags (self->probe, flags);
+    if (ret != 0) {
+        PyErr_SetString (PyExc_RuntimeError, "Failed to set partition flags");
+        return NULL;
+    }
+
+    Py_RETURN_NONE;
+}
+
+PyDoc_STRVAR(Probe_enable_partitions__doc__,
+"enable_partitions (enable)\n\n" \
+"Enables/disables the partitions probing for non-binary interface.");
+static PyObject *Probe_enable_partitions (ProbeObject *self, PyObject *args, PyObject *kwargs) {
+    int ret = 0;
+    bool enable = false;
+    char *kwlist[] = { "enable", NULL };
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "p", kwlist, &enable)) {
+        PyErr_SetString (PyExc_AttributeError, "Failed to parse arguments");
+        return NULL;
+    }
+
+    ret = blkid_probe_enable_partitions (self->probe, enable);
+    if (ret != 0) {
+        PyErr_Format (PyExc_RuntimeError, "Failed to %s partitions probing", enable ? "enable" : "disable");
+        return NULL;
+    }
+
+    Py_RETURN_NONE;
+}
+
+PyDoc_STRVAR(Probe_set_partitions_flags__doc__,
+"set_partitions_flags (flags)\n\n" \
+"Sets probing flags to the partitions prober. This function is optional.\n"
+"Use blkid.PARTS_* constants for the 'flags' argument.");
+static PyObject *Probe_set_partitions_flags (ProbeObject *self, PyObject *args, PyObject *kwargs) {
+    int ret = 0;
+    int flags = 0;
+    char *kwlist[] = { "flags", NULL };
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "i", kwlist, &flags)) {
+        PyErr_SetString (PyExc_AttributeError, "Failed to parse arguments");
+        return NULL;
+    }
+
+    ret = blkid_probe_set_partitions_flags (self->probe, flags);
+    if (ret != 0) {
+        PyErr_SetString (PyExc_RuntimeError, "Failed to set superblock flags");
+        return NULL;
+    }
+
+    Py_RETURN_NONE;
+}
+
+PyDoc_STRVAR(Probe_lookup_value__doc__,
+"lookup_value (name)\n\n" \
+"Assigns the device to probe control struct, resets internal buffers and resets the current probing.");
+static PyObject *Probe_lookup_value (ProbeObject *self, PyObject *args, PyObject *kwargs) {
+    int ret = 0;
+    char *kwlist[] = { "name", NULL };
+    char *name = NULL;
+    const char *value = NULL;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "s", kwlist, &name)) {
+        PyErr_SetString (PyExc_AttributeError, "Failed to parse arguments");
+        return NULL;
+    }
+
+    ret = blkid_probe_lookup_value (self->probe, name, &value, NULL);
+    if (ret != 0) {
+        PyErr_Format (PyExc_RuntimeError, "Failed to lookup '%s'", name);
+        return NULL;
+    }
+
+    return PyUnicode_FromString (value);
+}
+
+PyDoc_STRVAR(Probe_do_safeprobe__doc__,
+"do_safeprobe ()\n\n"
+"This function gathers probing results from all enabled chains and checks for ambivalent results"
+"(e.g. more filesystems on the device).\n\n"
+"Note about superblocks chain -- the function does not check for filesystems when a RAID signature is detected.\n"
+"The function also does not check for collision between RAIDs. The first detected RAID is returned.\n"
+"The function checks for collision between partition table and RAID signature -- it's recommended to "
+"enable partitions chain together with superblocks chain.\n");
+static PyObject *Probe_do_safeprobe (ProbeObject *self, PyObject *Py_UNUSED (ignored)) {
+    int ret = 0;
+
+    ret = blkid_do_safeprobe (self->probe);
+    if (ret != 0) {
+        PyErr_SetString (PyExc_RuntimeError, "Failed to safeprobe the device");
+        return NULL;
+    }
+
+    Py_RETURN_NONE;
+}
+
+PyDoc_STRVAR(Probe_do_fullprobe__doc__,
+"do_fullprobe ()\n\n"
+"This function gathers probing results from all enabled chains. Same as do_safeprobe() but "
+"does not check for collision between probing result.");
+static PyObject *Probe_do_fullprobe (ProbeObject *self, PyObject *Py_UNUSED (ignored)) {
+    int ret = 0;
+
+    ret = blkid_do_fullprobe (self->probe);
+    if (ret != 0) {
+        PyErr_SetString (PyExc_RuntimeError, "Failed to fullprobe the device");
+        return NULL;
+    }
+
+    Py_RETURN_NONE;
+}
+
+PyDoc_STRVAR(Probe_do_probe__doc__,
+"do_probe ()\n\n"
+"Calls probing functions in all enabled chains. The superblocks chain is enabled by default."
+"The do_probe() stores result from only one probing function. It's necessary to call this routine "
+"in a loop to get results from all probing functions in all chains. The probing is reset by "
+"reset_probe() or by filter functions.");
+static PyObject *Probe_do_probe (ProbeObject *self, PyObject *Py_UNUSED (ignored)) {
+    int ret = 0;
+
+    ret = blkid_do_probe (self->probe);
+    if (ret != 0) {
+        PyErr_SetString (PyExc_RuntimeError, "Failed to probe the device");
+        return NULL;
+    }
+
+    Py_RETURN_NONE;
+}
+
+PyDoc_STRVAR(Probe_reset_probe__doc__,
+"reset_probe ()\n\n"
+"Zeroize probing results and resets the current probing (this has impact to do_probe() only).\n"
+"This function does not touch probing filters and keeps assigned device.");
+static PyObject *Probe_reset_probe (ProbeObject *self, PyObject *Py_UNUSED (ignored)) {
+    blkid_reset_probe (self->probe);
+
+    Py_RETURN_NONE;
+}
+
+PyDoc_STRVAR(Probe_do_wipe__doc__,
+"do_wipe (dryrun=False)\n\n"
+"This function erases the current signature detected by the probe. The probe has to be open in "
+"O_RDWR mode, blkid.SUBLKS_MAGIC or/and blkid.PARTS_MAGIC flags has to be enabled (if you want "
+"to erase also superblock with broken check sums then use blkid.SUBLKS_BADCSUM too).\n\n"
+"After successful signature removing the probe prober will be moved one step back and the next "
+"do_probe() call will again call previously called probing function. All in-memory cached data "
+"from the device are always reset.");
+static PyObject *Probe_do_wipe (ProbeObject *self, PyObject *args, PyObject *kwargs) {
+    int ret = 0;
+    char *kwlist[] = { "dryrun", NULL };
+    bool dryrun = false;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "|p", kwlist, &dryrun)) {
+        PyErr_SetString (PyExc_AttributeError, "Failed to parse arguments");
+        return NULL;
+    }
+
+    ret = blkid_do_wipe (self->probe, dryrun);
+    if (ret != 0) {
+        PyErr_Format (PyExc_RuntimeError, "Failed to wipe the device: %s", strerror (errno));
+        return NULL;
+    }
+
+    Py_RETURN_NONE;
+}
+
 static PyMethodDef Probe_methods[] = {
-    {NULL, NULL, 0, NULL},
+    {"set_device", (PyCFunction)(void(*)(void)) Probe_set_device, METH_VARARGS|METH_KEYWORDS, Probe_set_device__doc__},
+    {"do_safeprobe", (PyCFunction) Probe_do_safeprobe, METH_NOARGS, Probe_do_safeprobe__doc__},
+    {"do_fullprobe", (PyCFunction) Probe_do_fullprobe, METH_NOARGS, Probe_do_fullprobe__doc__},
+    {"do_probe", (PyCFunction) Probe_do_probe, METH_NOARGS, Probe_do_probe__doc__},
+    {"reset_probe", (PyCFunction) Probe_reset_probe, METH_NOARGS, Probe_reset_probe__doc__},
+    {"do_wipe", (PyCFunction)(void(*)(void)) Probe_do_wipe, METH_VARARGS|METH_KEYWORDS, Probe_do_wipe__doc__},
+    {"enable_partitions", (PyCFunction)(void(*)(void)) Probe_enable_partitions, METH_VARARGS|METH_KEYWORDS, Probe_enable_partitions__doc__},
+    {"set_partitions_flags", (PyCFunction)(void(*)(void)) Probe_set_partitions_flags, METH_VARARGS|METH_KEYWORDS, Probe_set_partitions_flags__doc__},
+    {"enable_superblocks", (PyCFunction)(void(*)(void)) Probe_enable_superblocks, METH_VARARGS|METH_KEYWORDS, Probe_enable_superblocks__doc__},
+    {"set_superblocks_flags", (PyCFunction)(void(*)(void)) Probe_set_superblocks_flags, METH_VARARGS|METH_KEYWORDS, Probe_set_superblocks_flags__doc__},
+    {"lookup_value", (PyCFunction)(void(*)(void)) Probe_lookup_value, METH_VARARGS|METH_KEYWORDS, Probe_lookup_value__doc__},
 };
 
 PyTypeObject ProbeType = {
