@@ -43,6 +43,35 @@ PyMODINIT_FUNC PyInit_blkid (void) {
     if (!module)
         return NULL;
 
+    PyModule_AddIntConstant (module, "FLTR_NOTIN", BLKID_FLTR_NOTIN);
+    PyModule_AddIntConstant (module, "FLTR_ONLYIN", BLKID_FLTR_ONLYIN);
+
+    PyModule_AddIntConstant (module, "DEV_CREATE", BLKID_DEV_CREATE);
+    PyModule_AddIntConstant (module, "DEV_FIND", BLKID_DEV_FIND);
+    PyModule_AddIntConstant (module, "DEV_NORMAL", BLKID_DEV_NORMAL);
+    PyModule_AddIntConstant (module, "DEV_VERIFY", BLKID_DEV_VERIFY);
+
+    PyModule_AddIntConstant (module, "PARTS_ENTRY_DETAILS", BLKID_PARTS_ENTRY_DETAILS);
+    PyModule_AddIntConstant (module, "PARTS_FORCE_GPT", BLKID_PARTS_FORCE_GPT);
+    PyModule_AddIntConstant (module, "PARTS_MAGIC", BLKID_PARTS_MAGIC);
+
+    PyModule_AddIntConstant (module, "SUBLKS_BADCSUM", BLKID_SUBLKS_BADCSUM);
+    PyModule_AddIntConstant (module, "SUBLKS_DEFAULT", BLKID_SUBLKS_DEFAULT);
+    PyModule_AddIntConstant (module, "SUBLKS_LABEL", BLKID_SUBLKS_LABEL);
+    PyModule_AddIntConstant (module, "SUBLKS_LABELRAW", BLKID_SUBLKS_LABELRAW);
+    PyModule_AddIntConstant (module, "SUBLKS_MAGIC", BLKID_SUBLKS_MAGIC);
+    PyModule_AddIntConstant (module, "SUBLKS_SECTYPE", BLKID_SUBLKS_SECTYPE);
+    PyModule_AddIntConstant (module, "SUBLKS_TYPE", BLKID_SUBLKS_TYPE);
+    PyModule_AddIntConstant (module, "SUBLKS_USAGE", BLKID_SUBLKS_USAGE);
+    PyModule_AddIntConstant (module, "SUBLKS_UUID", BLKID_SUBLKS_UUID);
+    PyModule_AddIntConstant (module, "SUBLKS_UUIDRAW", BLKID_SUBLKS_UUIDRAW);
+    PyModule_AddIntConstant (module, "SUBLKS_VERSION", BLKID_SUBLKS_VERSION);
+
+    PyModule_AddIntConstant (module, "USAGE_CRYPTO", BLKID_USAGE_CRYPTO);
+    PyModule_AddIntConstant (module, "USAGE_FILESYSTEM", BLKID_USAGE_FILESYSTEM);
+    PyModule_AddIntConstant (module, "USAGE_OTHER", BLKID_USAGE_OTHER);
+    PyModule_AddIntConstant (module, "USAGE_RAID", BLKID_USAGE_RAID);
+
     Py_INCREF (&ProbeType);
     if (PyModule_AddObject (module, "Probe", (PyObject *) &ProbeType) < 0) {
         Py_DECREF (&ProbeType);
