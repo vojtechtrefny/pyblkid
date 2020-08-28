@@ -15,40 +15,22 @@
  * License along with this library; if not, see <http://www.gnu.org/licenses/>.
  *
  */
+#ifndef PROBE_H
+#define PROBE_H
 
-#include "pyblkid.h"
-#include "probe.h"
+#include <Python.h>
 
 #include <blkid/blkid.h>
 
-static PyMethodDef BlkidMethods[] = {
-    {NULL, NULL, 0, NULL}
-};
+typedef struct {
+    PyObject_HEAD
+    blkid_probe probe;
+} ProbeObject;
 
-static struct PyModuleDef blkidmodule = {
-    PyModuleDef_HEAD_INIT,
-    .m_name = "blkid",
-    .m_doc = "Python interface for the libblkid C library",
-    .m_size = -1,
-    .m_methods = BlkidMethods,
-};
+extern PyTypeObject ProbeType;
 
-PyMODINIT_FUNC PyInit_blkid (void) {
-    PyObject *module = NULL;
+PyObject *Probe_new (PyTypeObject *type,  PyObject *args, PyObject *kwargs);
+int Probe_init (ProbeObject *self, PyObject *args, PyObject *kwargs);
+void Probe_dealloc (ProbeObject *self);
 
-    if (PyType_Ready (&ProbeType) < 0)
-        return NULL;
-
-    module = PyModule_Create (&blkidmodule);
-    if (!module)
-        return NULL;
-
-    Py_INCREF (&ProbeType);
-    if (PyModule_AddObject (module, "Probe", (PyObject *) &ProbeType) < 0) {
-        Py_DECREF (&ProbeType);
-        Py_DECREF (module);
-        return NULL;
-    }
-
-    return module;
-}
+#endif /* PROBE_H */
