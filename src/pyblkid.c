@@ -21,7 +21,30 @@
 
 #include <blkid/blkid.h>
 
+#define UNUSED __attribute__((unused))
+
+
+PyDoc_STRVAR(Blkid_init_debug__doc__,
+"init_debug (mask)\n\n"
+"If the mask is not specified then this function reads LIBBLKID_DEBUG environment variable to get the mask.\n"
+"Already initialized debugging stuff cannot be changed. It does not have effect to call this function twice.\n\n"
+"Use '0xffff' to enable full debugging.\n");
+static PyObject *Blkid_init_debug (PyObject *self UNUSED, PyObject *args, PyObject *kwargs) {
+    int mask = 0;
+    char *kwlist[] = { "mask", NULL };
+
+    if (!PyArg_ParseTupleAndKeywords (args, kwargs, "|i", kwlist, &mask)) {
+        PyErr_SetString (PyExc_AttributeError, "Failed to parse arguments");
+        return NULL;
+    }
+
+    blkid_init_debug (mask);
+
+    Py_RETURN_NONE;
+}
+
 static PyMethodDef BlkidMethods[] = {
+    {"init_debug", (PyCFunction)(void(*)(void)) Blkid_init_debug, METH_VARARGS|METH_KEYWORDS, Blkid_init_debug__doc__},
     {NULL, NULL, 0, NULL}
 };
 
