@@ -313,6 +313,37 @@ static PyMethodDef Probe_methods[] = {
     {"lookup_value", (PyCFunction)(void(*)(void)) Probe_lookup_value, METH_VARARGS|METH_KEYWORDS, Probe_lookup_value__doc__},
 };
 
+static PyObject *Probe_get_offset (ProbeObject *self, PyObject *Py_UNUSED (ignored)) {
+	blkid_loff_t offset = blkid_probe_get_offset(self->probe);
+
+    return PyLong_FromLongLong (offset);
+}
+
+static PyObject *Probe_get_sectors (ProbeObject *self, PyObject *Py_UNUSED (ignored)) {
+	blkid_loff_t sectors = blkid_probe_get_sectors(self->probe);
+
+    return PyLong_FromLongLong (sectors);
+}
+
+static PyObject *Probe_get_size (ProbeObject *self, PyObject *Py_UNUSED (ignored)) {
+	blkid_loff_t size = blkid_probe_get_size(self->probe);
+
+    return PyLong_FromLongLong (size);
+}
+
+static PyObject *Probe_get_sector_size (ProbeObject *self, PyObject *Py_UNUSED (ignored)) {
+	unsigned int sector_size = blkid_probe_get_sectorsize(self->probe);
+
+    return PyLong_FromUnsignedLong (sector_size);
+}
+
+static PyGetSetDef Probe_getseters[] = {
+    {"offset",	(getter) Probe_get_offset, NULL, " offset of probing area as defined by Probe.set_device() or -1 in case of error", NULL},
+    {"sectors",	(getter) Probe_get_sectors, NULL, "512-byte sector count or -1 in case of error", NULL},
+    {"size",	(getter) Probe_get_size, NULL, "size of probing area as defined by Probe.set_device()", NULL},
+    {"sector_size",	(getter) Probe_get_sector_size, NULL, "block device logical sector size (BLKSSZGET ioctl, default 512).", NULL},
+};
+
 PyTypeObject ProbeType = {
     PyVarObject_HEAD_INIT (NULL, 0)
     .tp_name = "blkid.Probe",
@@ -323,4 +354,5 @@ PyTypeObject ProbeType = {
     .tp_dealloc = (destructor) Probe_dealloc,
     .tp_init = (initproc) Probe_init,
     .tp_methods = Probe_methods,
+    .tp_getset = Probe_getseters,
 };
