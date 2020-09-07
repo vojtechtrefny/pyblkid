@@ -324,25 +324,25 @@ static PyObject *Probe_get_fd (ProbeObject *self, PyObject *Py_UNUSED (ignored))
 }
 
 static PyObject *Probe_get_offset (ProbeObject *self, PyObject *Py_UNUSED (ignored)) {
-	blkid_loff_t offset = blkid_probe_get_offset(self->probe);
+	blkid_loff_t offset = blkid_probe_get_offset (self->probe);
 
     return PyLong_FromLongLong (offset);
 }
 
 static PyObject *Probe_get_sectors (ProbeObject *self, PyObject *Py_UNUSED (ignored)) {
-	blkid_loff_t sectors = blkid_probe_get_sectors(self->probe);
+	blkid_loff_t sectors = blkid_probe_get_sectors (self->probe);
 
     return PyLong_FromLongLong (sectors);
 }
 
 static PyObject *Probe_get_size (ProbeObject *self, PyObject *Py_UNUSED (ignored)) {
-	blkid_loff_t size = blkid_probe_get_size(self->probe);
+	blkid_loff_t size = blkid_probe_get_size (self->probe);
 
     return PyLong_FromLongLong (size);
 }
 
 static PyObject *Probe_get_sector_size (ProbeObject *self, PyObject *Py_UNUSED (ignored)) {
-	unsigned int sector_size = blkid_probe_get_sectorsize(self->probe);
+	unsigned int sector_size = blkid_probe_get_sectorsize (self->probe);
 
     return PyLong_FromUnsignedLong (sector_size);
 }
@@ -356,10 +356,10 @@ static PyObject *Probe_get_wholedisk_devno (ProbeObject *self, PyObject *Py_UNUS
 static PyGetSetDef Probe_getseters[] = {
     {"devno", (getter) Probe_get_devno, NULL, "block device number, or 0 for regular files", NULL},
     {"fd", (getter) Probe_get_fd, NULL, "file descriptor for assigned device/file or -1 in case of error", NULL},
-    {"offset",	(getter) Probe_get_offset, NULL, " offset of probing area as defined by Probe.set_device() or -1 in case of error", NULL},
-    {"sectors",	(getter) Probe_get_sectors, NULL, "512-byte sector count or -1 in case of error", NULL},
-    {"size",	(getter) Probe_get_size, NULL, "size of probing area as defined by Probe.set_device()", NULL},
-    {"sector_size",	(getter) Probe_get_sector_size, NULL, "block device logical sector size (BLKSSZGET ioctl, default 512).", NULL},
+    {"offset", (getter) Probe_get_offset, NULL, "offset of probing area as defined by Probe.set_device() or -1 in case of error", NULL},
+    {"sectors", (getter) Probe_get_sectors, NULL, "512-byte sector count or -1 in case of error", NULL},
+    {"size", (getter) Probe_get_size, NULL, "size of probing area as defined by Probe.set_device()", NULL},
+    {"sector_size", (getter) Probe_get_sector_size, NULL, "block device logical sector size (BLKSSZGET ioctl, default 512).", NULL},
     {"wholedisk_devno", (getter) Probe_get_wholedisk_devno, NULL, "device number of the wholedisk, or 0 for regular files", NULL},
 };
 
