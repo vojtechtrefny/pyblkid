@@ -1,2 +1,4 @@
 env/
 build/
+
+tests/__pycache__/*
