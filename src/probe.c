@@ -69,7 +69,7 @@ PyDoc_STRVAR(Probe_set_device__doc__,
 "'offset' and 'size' specify begin and size of probing area (zero means whole device/file)");
 static PyObject *Probe_set_device (ProbeObject *self, PyObject *args, PyObject *kwargs) {
     int ret = 0;
-    char *kwlist[] = { "device", "offset", "size", NULL };
+    char *kwlist[] = { "device", "flags", "offset", "size", NULL };
     char *device = NULL;
     blkid_loff_t offset = 0;
     blkid_loff_t size = 0;
