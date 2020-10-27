@@ -1,0 +1,20 @@
+language: c
+
+sudo: required
+os: linux
+dist: focal
+group: edge
+
+compiler:
+  - gcc
+
+install:
+  - sudo apt-get -qq update
+  - sudo apt-get -y -qq install libblkid-dev libblkid1 python3-dev
+
+script:
+  - sudo make test
+
+branches:
+  only:
+  - master
