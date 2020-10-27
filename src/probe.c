@@ -140,6 +140,118 @@ static PyObject *Probe_set_superblocks_flags (ProbeObject *self, PyObject *args,
     Py_RETURN_NONE;
 }
 
+PyDoc_STRVAR(Probe_filter_superblocks_type__doc__,
+"filter_superblocks_type (flag, names)\n\n" \
+"Filter superblocks prober results based on type.\n"
+"blkid.FLTR_NOTIN - probe for all items which are NOT IN names\n"
+"blkid.FLTR_ONLYIN - probe for items which are IN names\n"
+"names: array of probing function names (e.g. 'vfat').");
+static PyObject *Probe_filter_superblocks_type (ProbeObject *self, PyObject *args, PyObject *kwargs) {
+    int ret = 0;
+    int flag = 0;
+    PyObject *pynames = NULL;
+    PyObject *pystring = NULL;
+    Py_ssize_t len = 0;
+    char **names = NULL;
+    char *kwlist[] = { "flag", "names", NULL };
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "iO", kwlist, &flag, &pynames)) {
+        PyErr_SetString (PyExc_AttributeError, "Failed to parse arguments");
+        return NULL;
+    }
+
+    if (!PySequence_Check (pynames)) {
+        PyErr_SetString (PyExc_AttributeError, "Failed to parse list of names for filter");
+        return NULL;
+    }
+
+    len = PySequence_Size (pynames);
+    if (len < 1) {
+        PyErr_SetString (PyExc_AttributeError, "Failed to parse list of names for filter");
+        return NULL;
+    }
+
+    names = malloc(sizeof (char *) * (len + 1));
+
+    for (Py_ssize_t i = 0; i < len; i++) {
+        pystring = PyUnicode_AsEncodedString (PySequence_GetItem (pynames, i), "utf-8", "replace");
+        names[i] = strdup (PyBytes_AsString (pystring));
+        Py_DECREF (pystring);
+    }
+    names[len] = NULL;
+
+    ret = blkid_probe_filter_superblocks_type (self->probe, flag, names);
+    if (ret != 0) {
+        PyErr_SetString (PyExc_RuntimeError, "Failed to set probe filter");
+        for (Py_ssize_t i = 0; i < len; i++)
+            free(names[i]);
+        free (names);
+        return NULL;
+    }
+
+    for (Py_ssize_t i = 0; i < len; i++)
+            free(names[i]);
+    free (names);
+
+    Py_RETURN_NONE;
+}
+
+PyDoc_STRVAR(Probe_filter_superblocks_usage__doc__,
+"filter_superblocks_usage (flag, usage)\n\n" \
+"Filter superblocks prober results based on usage.\n"
+"blkid.FLTR_NOTIN - probe for all items which are NOT IN names\n"
+"blkid.FLTR_ONLYIN - probe for items which are IN names\n"
+"usage: blkid.USAGE_* flags");
+static PyObject *Probe_filter_superblocks_usage (ProbeObject *self, PyObject *args, PyObject *kwargs) {
+    int ret = 0;
+    int flag = 0;
+    int usage = 0;
+    char *kwlist[] = { "flag", "usage", NULL };
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "ii", kwlist, &flag, &usage)) {
+        PyErr_SetString (PyExc_AttributeError, "Failed to parse arguments");
+        return NULL;
+    }
+
+    ret = blkid_probe_filter_superblocks_usage (self->probe, flag, usage);
+    if (ret != 0) {
+        PyErr_SetString (PyExc_RuntimeError, "Failed to set probe filter");
+        return NULL;
+    }
+
+    Py_RETURN_NONE;
+}
+
+PyDoc_STRVAR(Probe_invert_superblocks_filter__doc__,
+"invert_superblocks_filter ()\n\n"
+"This function inverts superblocks probing filter.\n");
+static PyObject *Probe_invert_superblocks_filter (ProbeObject *self, PyObject *Py_UNUSED (ignored)) {
+    int ret = 0;
+
+    ret = blkid_probe_invert_superblocks_filter (self->probe);
+    if (ret != 0) {
+        PyErr_SetString (PyExc_RuntimeError, "Failed to invert superblock probing filter");
+        return NULL;
+    }
+
+    Py_RETURN_NONE;
+}
+
+PyDoc_STRVAR(Probe_reset_superblocks_filter__doc__,
+"reset_superblocks_filter ()\n\n"
+"This function resets superblocks probing filter.\n");
+static PyObject *Probe_reset_superblocks_filter (ProbeObject *self, PyObject *Py_UNUSED (ignored)) {
+    int ret = 0;
+
+    ret = blkid_probe_reset_superblocks_filter (self->probe);
+    if (ret != 0) {
+        PyErr_SetString (PyExc_RuntimeError, "Failed to reset superblock probing filter");
+        return NULL;
+    }
+
+    Py_RETURN_NONE;
+}
+
 PyDoc_STRVAR(Probe_enable_partitions__doc__,
 "enable_partitions (enable)\n\n" \
 "Enables/disables the partitions probing for non-binary interface.");
@@ -309,7 +421,11 @@ static PyMethodDef Probe_methods[] = {
     {"enable_partitions", (PyCFunction)(void(*)(void)) Probe_enable_partitions, METH_VARARGS|METH_KEYWORDS, Probe_enable_partitions__doc__},
     {"set_partitions_flags", (PyCFunction)(void(*)(void)) Probe_set_partitions_flags, METH_VARARGS|METH_KEYWORDS, Probe_set_partitions_flags__doc__},
     {"enable_superblocks", (PyCFunction)(void(*)(void)) Probe_enable_superblocks, METH_VARARGS|METH_KEYWORDS, Probe_enable_superblocks__doc__},
+    {"filter_superblocks_type", (PyCFunction)(void(*)(void)) Probe_filter_superblocks_type, METH_VARARGS|METH_KEYWORDS, Probe_filter_superblocks_type__doc__},
+    {"filter_superblocks_usage", (PyCFunction)(void(*)(void)) Probe_filter_superblocks_usage, METH_VARARGS|METH_KEYWORDS, Probe_filter_superblocks_usage__doc__},
     {"set_superblocks_flags", (PyCFunction)(void(*)(void)) Probe_set_superblocks_flags, METH_VARARGS|METH_KEYWORDS, Probe_set_superblocks_flags__doc__},
+    {"invert_superblocks_filter", (PyCFunction) Probe_invert_superblocks_filter, METH_NOARGS, Probe_invert_superblocks_filter__doc__},
+    {"reset_superblocks_filter", (PyCFunction) Probe_reset_superblocks_filter, METH_NOARGS, Probe_reset_superblocks_filter__doc__},
     {"lookup_value", (PyCFunction)(void(*)(void)) Probe_lookup_value, METH_VARARGS|METH_KEYWORDS, Probe_lookup_value__doc__},
 };
 

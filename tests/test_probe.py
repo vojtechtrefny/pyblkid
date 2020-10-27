@@ -57,8 +57,83 @@ class ProbeTestCase(unittest.TestCase):
         fsuuid = pr.lookup_value("UUID")
         self.assertEqual(fsuuid, "35f66dab-477e-4090-a872-95ee0e493ad6")
 
+    def test_probe_filter_type(self):
+        pr = blkid.Probe()
+        pr.set_device(self.loop_dev)
 
+        pr.enable_superblocks(True)
+        pr.set_superblocks_flags(blkid.SUBLKS_TYPE | blkid.SUBLKS_USAGE | blkid.SUBLKS_UUID)
 
+        pr.filter_superblocks_type(blkid.FLTR_ONLYIN, ["ext3", "ext4"])
+        pr.do_safeprobe()
+
+        fstype = pr.lookup_value("TYPE")
+        self.assertEqual(fstype, "ext3")
+
+        pr.filter_superblocks_type(blkid.FLTR_NOTIN, ["ext3", "ext4"])
+        pr.do_safeprobe()
+
+        with self.assertRaises(RuntimeError):
+            fstype = pr.lookup_value("TYPE")
+
+        pr.filter_superblocks_type(blkid.FLTR_NOTIN, ["vfat", "ntfs"])
+        pr.do_safeprobe()
+
+        fstype = pr.lookup_value("TYPE")
+        self.assertEqual(fstype, "ext3")
+
+        # invert the filter
+        pr.invert_superblocks_filter()
+        pr.do_safeprobe()
+
+        with self.assertRaises(RuntimeError):
+            fstype = pr.lookup_value("TYPE")
+
+        # reset to default
+        pr.reset_superblocks_filter()
+        pr.do_safeprobe()
+
+        fstype = pr.lookup_value("TYPE")
+        self.assertEqual(fstype, "ext3")
+
+    def test_probe_filter_usage(self):
+        pr = blkid.Probe()
+        pr.set_device(self.loop_dev)
+
+        pr.enable_superblocks(True)
+        pr.set_superblocks_flags(blkid.SUBLKS_TYPE | blkid.SUBLKS_USAGE | blkid.SUBLKS_UUID)
+
+        pr.filter_superblocks_usage(blkid.FLTR_ONLYIN, blkid.USAGE_FILESYSTEM)
+        pr.do_safeprobe()
+
+        usage = pr.lookup_value("USAGE")
+        self.assertEqual(usage, "filesystem")
+
+        pr.filter_superblocks_usage(blkid.FLTR_NOTIN, blkid.USAGE_FILESYSTEM | blkid.USAGE_CRYPTO)
+        pr.do_safeprobe()
+
+        with self.assertRaises(RuntimeError):
+            usage = pr.lookup_value("USAGE")
+
+        pr.filter_superblocks_usage(blkid.FLTR_NOTIN, blkid.USAGE_RAID | blkid.USAGE_CRYPTO)
+        pr.do_safeprobe()
+
+        usage = pr.lookup_value("USAGE")
+        self.assertEqual(usage, "filesystem")
+
+        # invert the filter
+        pr.invert_superblocks_filter()
+        pr.do_safeprobe()
+
+        with self.assertRaises(RuntimeError):
+            usage = pr.lookup_value("USAGE")
+
+        # reset to default
+        pr.reset_superblocks_filter()
+        pr.do_safeprobe()
+
+        usage = pr.lookup_value("USAGE")
+        self.assertEqual(usage, "filesystem")
 
 
 if __name__ == "__main__":
