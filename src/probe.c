@@ -220,7 +220,7 @@ static PyObject *Probe_do_safeprobe (ProbeObject *self, PyObject *Py_UNUSED (ign
     int ret = 0;
 
     ret = blkid_do_safeprobe (self->probe);
-    if (ret != 0) {
+    if (ret < 0) {
         PyErr_SetString (PyExc_RuntimeError, "Failed to safeprobe the device");
         return NULL;
     }
