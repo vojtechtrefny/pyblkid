@@ -6,6 +6,7 @@ from . import utils
 import blkid
 
 
+@unittest.skipUnless(os.geteuid() == 0, "requires root access")
 class ProbeTestCase(unittest.TestCase):
 
     test_image = "test.img.xz"
