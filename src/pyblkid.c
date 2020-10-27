@@ -43,8 +43,24 @@ static PyObject *Blkid_init_debug (PyObject *self UNUSED, PyObject *args, PyObje
     Py_RETURN_NONE;
 }
 
+PyDoc_STRVAR(Blkid_known_fstype__doc__,
+"known_fstype (fstype)\n\n"
+"Returns whether fstype is a known filesystem type or not.\n");
+static PyObject *Blkid_known_fstype (PyObject *self UNUSED, PyObject *args, PyObject *kwargs) {
+    const char *fstype = NULL;
+    char *kwlist[] = { "fstype", NULL };
+
+    if (!PyArg_ParseTupleAndKeywords (args, kwargs, "s", kwlist, &fstype)) {
+        PyErr_SetString (PyExc_AttributeError, "Failed to parse arguments");
+        return NULL;
+    }
+
+    return PyBool_FromLong (blkid_known_fstype (fstype));
+}
+
 static PyMethodDef BlkidMethods[] = {
     {"init_debug", (PyCFunction)(void(*)(void)) Blkid_init_debug, METH_VARARGS|METH_KEYWORDS, Blkid_init_debug__doc__},
+    {"known_fstype", (PyCFunction)(void(*)(void)) Blkid_known_fstype, METH_VARARGS|METH_KEYWORDS, Blkid_known_fstype__doc__},
     {NULL, NULL, 0, NULL}
 };
 
