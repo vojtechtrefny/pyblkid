@@ -25,5 +25,11 @@ test: all
 	@env PYTHONPATH=$$(find $$(pwd) -name "*.so" | head -n 1 | xargs dirname):src \
 	$(PYTHON) -m unittest discover -v
 
+run-ipython: all
+	@env PYTHONPATH=$$(find $$(pwd) -name "*.so" | head -n 1 | xargs dirname):src i$(PYTHON)
+
+run-root-ipython: all
+	@sudo env PYTHONPATH=$$(find $$(pwd) -name "*.so" | head -n 1 | xargs dirname):src i$(PYTHON)
+
 clean:
 	-rm -r build
