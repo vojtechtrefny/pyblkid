@@ -49,13 +49,13 @@ class ProbeTestCase(unittest.TestCase):
 
         pr.do_safeprobe()
         usage = pr.lookup_value("USAGE")
-        self.assertEqual(usage, "filesystem")
+        self.assertEqual(usage, b"filesystem")
 
         fstype = pr.lookup_value("TYPE")
-        self.assertEqual(fstype, "ext3")
+        self.assertEqual(fstype, b"ext3")
 
         fsuuid = pr.lookup_value("UUID")
-        self.assertEqual(fsuuid, "35f66dab-477e-4090-a872-95ee0e493ad6")
+        self.assertEqual(fsuuid, b"35f66dab-477e-4090-a872-95ee0e493ad6")
 
     def test_probe_filter_type(self):
         pr = blkid.Probe()
@@ -68,7 +68,7 @@ class ProbeTestCase(unittest.TestCase):
         pr.do_safeprobe()
 
         fstype = pr.lookup_value("TYPE")
-        self.assertEqual(fstype, "ext3")
+        self.assertEqual(fstype, b"ext3")
 
         pr.filter_superblocks_type(blkid.FLTR_NOTIN, ["ext3", "ext4"])
         pr.do_safeprobe()
@@ -80,7 +80,7 @@ class ProbeTestCase(unittest.TestCase):
         pr.do_safeprobe()
 
         fstype = pr.lookup_value("TYPE")
-        self.assertEqual(fstype, "ext3")
+        self.assertEqual(fstype, b"ext3")
 
         # invert the filter
         pr.invert_superblocks_filter()
@@ -94,7 +94,7 @@ class ProbeTestCase(unittest.TestCase):
         pr.do_safeprobe()
 
         fstype = pr.lookup_value("TYPE")
-        self.assertEqual(fstype, "ext3")
+        self.assertEqual(fstype, b"ext3")
 
     def test_probe_filter_usage(self):
         pr = blkid.Probe()
@@ -107,7 +107,7 @@ class ProbeTestCase(unittest.TestCase):
         pr.do_safeprobe()
 
         usage = pr.lookup_value("USAGE")
-        self.assertEqual(usage, "filesystem")
+        self.assertEqual(usage, b"filesystem")
 
         pr.filter_superblocks_usage(blkid.FLTR_NOTIN, blkid.USAGE_FILESYSTEM | blkid.USAGE_CRYPTO)
         pr.do_safeprobe()
@@ -119,7 +119,7 @@ class ProbeTestCase(unittest.TestCase):
         pr.do_safeprobe()
 
         usage = pr.lookup_value("USAGE")
-        self.assertEqual(usage, "filesystem")
+        self.assertEqual(usage, b"filesystem")
 
         # invert the filter
         pr.invert_superblocks_filter()
@@ -133,7 +133,7 @@ class ProbeTestCase(unittest.TestCase):
         pr.do_safeprobe()
 
         usage = pr.lookup_value("USAGE")
-        self.assertEqual(usage, "filesystem")
+        self.assertEqual(usage, b"filesystem")
 
 
 if __name__ == "__main__":

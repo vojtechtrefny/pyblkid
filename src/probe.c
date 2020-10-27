@@ -317,7 +317,7 @@ static PyObject *Probe_lookup_value (ProbeObject *self, PyObject *args, PyObject
         return NULL;
     }
 
-    return PyUnicode_FromString (value);
+    return PyBytes_FromString (value);
 }
 
 PyDoc_STRVAR(Probe_do_safeprobe__doc__,
