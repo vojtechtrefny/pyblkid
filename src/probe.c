@@ -348,7 +348,7 @@ static PyObject *Probe_do_fullprobe (ProbeObject *self, PyObject *Py_UNUSED (ign
     int ret = 0;
 
     ret = blkid_do_fullprobe (self->probe);
-    if (ret != 0) {
+    if (ret < 0) {
         PyErr_SetString (PyExc_RuntimeError, "Failed to fullprobe the device");
         return NULL;
     }
@@ -366,7 +366,7 @@ static PyObject *Probe_do_probe (ProbeObject *self, PyObject *Py_UNUSED (ignored
     int ret = 0;
 
     ret = blkid_do_probe (self->probe);
-    if (ret != 0) {
+    if (ret < 0) {
         PyErr_SetString (PyExc_RuntimeError, "Failed to probe the device");
         return NULL;
     }
