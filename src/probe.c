@@ -374,12 +374,75 @@ static PyObject *Probe_do_probe (ProbeObject *self, PyObject *Py_UNUSED (ignored
     Py_RETURN_NONE;
 }
 
+PyDoc_STRVAR(Probe_step_back__doc__,
+"step_back ()\n\n"
+"This function move pointer to the probing chain one step back -- it means that the previously "
+"used probing function will be called again in the next Probe.do_probe() call.\n"
+"This is necessary for example if you erase or modify on-disk superblock according to the "
+"current libblkid probing result.\n"
+"Note that Probe.hide_range() changes semantic of this function and cached buffers are "
+"not reset, but library uses in-memory modified buffers to call the next probing function.");
+static PyObject *Probe_step_back (ProbeObject *self, PyObject *Py_UNUSED (ignored)) {
+    int ret = 0;
+
+    ret = blkid_probe_step_back (self->probe);
+    if (ret < 0) {
+        PyErr_SetString (PyExc_RuntimeError, "Failed to step back the probe");
+        return NULL;
+    }
+
+    Py_RETURN_NONE;
+}
+
+PyDoc_STRVAR(Probe_reset_buffers__doc__,
+"reset_buffers ()\n\n"
+"libblkid reuse all already read buffers from the device. The buffers may be modified by Probe.hide_range().\n"
+"This function reset and free all cached buffers. The next Probe.do_probe() will read all data from the device.");
+static PyObject *Probe_reset_buffers (ProbeObject *self, PyObject *Py_UNUSED (ignored)) {
+    int ret = 0;
+
+    ret = blkid_probe_reset_buffers (self->probe);
+    if (ret != 0) {
+        PyErr_SetString (PyExc_RuntimeError, "Failed to reset buffers");
+        return NULL;
+    }
+
+    Py_RETURN_NONE;
+}
+
 PyDoc_STRVAR(Probe_reset_probe__doc__,
 "reset_probe ()\n\n"
 "Zeroize probing results and resets the current probing (this has impact to do_probe() only).\n"
 "This function does not touch probing filters and keeps assigned device.");
 static PyObject *Probe_reset_probe (ProbeObject *self, PyObject *Py_UNUSED (ignored)) {
     blkid_reset_probe (self->probe);
+
+    Py_RETURN_NONE;
+}
+
+PyDoc_STRVAR(Probe_hide_range__doc__,
+"hide_range (offset, length)\n\n" \
+"This function modifies in-memory cached data from the device. The specified range is zeroized. "
+"This is usable together with Probe.step_back(). The next Probe.do_probe() will not see specified area.\n"
+"Note that this is usable for already (by library) read data, and this function is not a way "
+"how to hide any large areas on your device.\n"
+"The function Probe.reset_buffers() reverts all.");
+static PyObject *Probe_hide_range (ProbeObject *self, PyObject *args, PyObject *kwargs) {
+    int ret = 0;
+    char *kwlist[] = { "offset", "length", NULL };
+    uint64_t offset = 0;
+    uint64_t length = 0;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "ii", kwlist, &offset, &length)) {
+        PyErr_SetString (PyExc_AttributeError, "Failed to parse arguments");
+        return NULL;
+    }
+
+    ret = blkid_probe_hide_range (self->probe, offset, length);
+    if (ret != 0) {
+        PyErr_SetString (PyExc_RuntimeError, "Failed to hide range");
+        return NULL;
+    }
 
     Py_RETURN_NONE;
 }
@@ -416,7 +479,10 @@ static PyMethodDef Probe_methods[] = {
     {"do_safeprobe", (PyCFunction) Probe_do_safeprobe, METH_NOARGS, Probe_do_safeprobe__doc__},
     {"do_fullprobe", (PyCFunction) Probe_do_fullprobe, METH_NOARGS, Probe_do_fullprobe__doc__},
     {"do_probe", (PyCFunction) Probe_do_probe, METH_NOARGS, Probe_do_probe__doc__},
+    {"step_back", (PyCFunction) Probe_step_back, METH_NOARGS, Probe_step_back__doc__},
+    {"reset_buffers", (PyCFunction) Probe_reset_buffers, METH_NOARGS, Probe_reset_buffers__doc__},
     {"reset_probe", (PyCFunction) Probe_reset_probe, METH_NOARGS, Probe_reset_probe__doc__},
+    {"hide_range", (PyCFunction)(void(*)(void)) Probe_hide_range, METH_VARARGS|METH_KEYWORDS, Probe_hide_range__doc__},
     {"do_wipe", (PyCFunction)(void(*)(void)) Probe_do_wipe, METH_VARARGS|METH_KEYWORDS, Probe_do_wipe__doc__},
     {"enable_partitions", (PyCFunction)(void(*)(void)) Probe_enable_partitions, METH_VARARGS|METH_KEYWORDS, Probe_enable_partitions__doc__},
     {"set_partitions_flags", (PyCFunction)(void(*)(void)) Probe_set_partitions_flags, METH_VARARGS|METH_KEYWORDS, Probe_set_partitions_flags__doc__},
@@ -490,6 +556,12 @@ static PyObject *Probe_get_wholedisk_devno (ProbeObject *self, PyObject *Py_UNUS
     return PyLong_FromUnsignedLong (devno);
 }
 
+static PyObject *Probe_get_is_wholedisk (ProbeObject *self __attribute__((unused)), PyObject *Py_UNUSED (ignored)) {
+    int wholedisk = blkid_probe_is_wholedisk (self->probe);
+
+    return PyBool_FromLong (wholedisk);
+}
+
 static PyGetSetDef Probe_getseters[] = {
     {"devno", (getter) Probe_get_devno, NULL, "block device number, or 0 for regular files", NULL},
     {"fd", (getter) Probe_get_fd, NULL, "file descriptor for assigned device/file or -1 in case of error", NULL},
@@ -498,6 +570,8 @@ static PyGetSetDef Probe_getseters[] = {
     {"size", (getter) Probe_get_size, NULL, "size of probing area as defined by Probe.set_device()", NULL},
     {"sector_size", (getter) Probe_get_sector_size, (setter) Probe_set_sector_size, "block device logical sector size (BLKSSZGET ioctl, default 512).", NULL},
     {"wholedisk_devno", (getter) Probe_get_wholedisk_devno, NULL, "device number of the wholedisk, or 0 for regular files", NULL},
+    {"is_wholedisk", (getter) Probe_get_is_wholedisk, NULL, "True if the device is whole-disk, False otherwise", NULL},
+    {NULL, NULL, NULL, NULL, NULL}
 };
 
 PyTypeObject ProbeType = {

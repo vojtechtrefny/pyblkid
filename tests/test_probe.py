@@ -35,12 +35,49 @@ class ProbeTestCase(unittest.TestCase):
         self.assertNotEqual(pr.devno, 0)
         self.assertNotEqual(pr.wholedisk_devno, 0)
 
+        self.assertTrue(pr.is_wholedisk)
+
         pr.sector_size = 4096
         self.assertEqual(pr.sector_size, 4096)
 
         pr.reset_probe()
 
     def test_probing(self):
+        pr = blkid.Probe()
+        pr.set_device(self.loop_dev)
+
+        pr.enable_superblocks(True)
+        pr.set_superblocks_flags(blkid.SUBLKS_TYPE | blkid.SUBLKS_USAGE | blkid.SUBLKS_MAGIC)
+
+        pr.do_probe()
+
+        usage = pr.lookup_value("USAGE")
+        self.assertEqual(usage, b"filesystem")
+
+        pr.step_back()
+        pr.do_probe()
+
+        usage = pr.lookup_value("USAGE")
+        self.assertEqual(usage, b"filesystem")
+
+        pr.reset_buffers()
+        pr.step_back()
+        pr.do_probe()
+
+        usage = pr.lookup_value("USAGE")
+        self.assertEqual(usage, b"filesystem")
+
+        offset = pr.lookup_value("SBMAGIC_OFFSET")
+        magic = pr.lookup_value("SBMAGIC")
+        pr.hide_range(int(offset), len(magic))
+
+        pr.step_back()
+        pr.do_probe()
+
+        with self.assertRaises(RuntimeError):
+            usage = pr.lookup_value("USAGE")
+
+    def test_safe_probing(self):
         pr = blkid.Probe()
         pr.set_device(self.loop_dev)
 
