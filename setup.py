@@ -23,6 +23,7 @@ def main():
           author_email="vtrefny@redhat.com",
           ext_modules=[Extension("blkid",
                                  sources = ["src/pyblkid.c",
+                                            "src/topology.c",
                                             "src/probe.c"],
                                  include_dirs = ["/usr/include"],
                                  libraries = ["blkid"],

@@ -15,8 +15,8 @@
  * License along with this library; if not, see <http://www.gnu.org/licenses/>.
  *
  */
-#ifndef PROBE_H
-#define PROBE_H
+#ifndef TOPOLOGY_H
+#define TOPOLOGY_H
 
 #include <Python.h>
 
@@ -24,15 +24,15 @@
 
 typedef struct {
     PyObject_HEAD
-    blkid_probe probe;
-    PyObject *topology;
-    int fd;
-} ProbeObject;
+    blkid_topology topology;
+} TopologyObject;
 
-extern PyTypeObject ProbeType;
+extern PyTypeObject TopologyType;
 
-PyObject *Probe_new (PyTypeObject *type,  PyObject *args, PyObject *kwargs);
-int Probe_init (ProbeObject *self, PyObject *args, PyObject *kwargs);
-void Probe_dealloc (ProbeObject *self);
+PyObject *Topology_new (PyTypeObject *type,  PyObject *args, PyObject *kwargs);
+int Topology_init (TopologyObject *self, PyObject *args, PyObject *kwargs);
+void Topology_dealloc (TopologyObject *self);
 
-#endif /* PROBE_H */
+PyObject *_Topology_get_topology_object (blkid_probe probe);
+
+#endif /* TOPOLOGY_H */

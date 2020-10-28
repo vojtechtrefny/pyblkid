@@ -17,6 +17,7 @@
  */
 
 #include "probe.h"
+#include "topology.h"
 
 #include <blkid/blkid.h>
 #include <errno.h>
@@ -32,6 +33,7 @@ PyObject *Probe_new (PyTypeObject *type,  PyObject *args UNUSED, PyObject *kwarg
     if (self) {
         self->probe = NULL;
         self->fd = -1;
+        self->topology = NULL;
     }
 
     return (PyObject *) self;
@@ -57,6 +59,9 @@ void Probe_dealloc (ProbeObject *self) {
 
     if (self->fd > 0)
         close (self->fd);
+
+    if (self->topology)
+        Py_DECREF (self->topology);
 
     blkid_free_probe (self->probe);
     Py_TYPE (self)->tp_free ((PyObject *) self);
@@ -297,6 +302,28 @@ static PyObject *Probe_set_partitions_flags (ProbeObject *self, PyObject *args, 
     Py_RETURN_NONE;
 }
 
+PyDoc_STRVAR(Probe_enable_topology__doc__,
+"enable_topology (enable)\n\n" \
+"Enables/disables the topology probing for non-binary interface.");
+static PyObject *Probe_enable_topology (ProbeObject *self, PyObject *args, PyObject *kwargs) {
+    int ret = 0;
+    bool enable = false;
+    char *kwlist[] = { "enable", NULL };
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "p", kwlist, &enable)) {
+        PyErr_SetString (PyExc_AttributeError, "Failed to parse arguments");
+        return NULL;
+    }
+
+    ret = blkid_probe_enable_topology (self->probe, enable);
+    if (ret != 0) {
+        PyErr_Format (PyExc_RuntimeError, "Failed to %s topology probing", enable ? "enable" : "disable");
+        return NULL;
+    }
+
+    Py_RETURN_NONE;
+}
+
 PyDoc_STRVAR(Probe_lookup_value__doc__,
 "lookup_value (name)\n\n" \
 "Assigns the device to probe control struct, resets internal buffers and resets the current probing.");
@@ -498,6 +525,7 @@ static PyMethodDef Probe_methods[] = {
     {"do_wipe", (PyCFunction)(void(*)(void)) Probe_do_wipe, METH_VARARGS|METH_KEYWORDS, Probe_do_wipe__doc__},
     {"enable_partitions", (PyCFunction)(void(*)(void)) Probe_enable_partitions, METH_VARARGS|METH_KEYWORDS, Probe_enable_partitions__doc__},
     {"set_partitions_flags", (PyCFunction)(void(*)(void)) Probe_set_partitions_flags, METH_VARARGS|METH_KEYWORDS, Probe_set_partitions_flags__doc__},
+    {"enable_topology", (PyCFunction)(void(*)(void)) Probe_enable_topology, METH_VARARGS|METH_KEYWORDS, Probe_enable_topology__doc__},
     {"enable_superblocks", (PyCFunction)(void(*)(void)) Probe_enable_superblocks, METH_VARARGS|METH_KEYWORDS, Probe_enable_superblocks__doc__},
     {"filter_superblocks_type", (PyCFunction)(void(*)(void)) Probe_filter_superblocks_type, METH_VARARGS|METH_KEYWORDS, Probe_filter_superblocks_type__doc__},
     {"filter_superblocks_usage", (PyCFunction)(void(*)(void)) Probe_filter_superblocks_usage, METH_VARARGS|METH_KEYWORDS, Probe_filter_superblocks_usage__doc__},
@@ -574,6 +602,17 @@ static PyObject *Probe_get_is_wholedisk (ProbeObject *self __attribute__((unused
     return PyBool_FromLong (wholedisk);
 }
 
+static PyObject *Probe_get_topology (ProbeObject *self, PyObject *Py_UNUSED (ignored)) {
+    if (self->topology) {
+        Py_INCREF (self->topology);
+        return self->topology;
+    }
+
+    self->topology = _Topology_get_topology_object (self->probe);
+
+    return self->topology;
+}
+
 static PyGetSetDef Probe_getseters[] = {
     {"devno", (getter) Probe_get_devno, NULL, "block device number, or 0 for regular files", NULL},
     {"fd", (getter) Probe_get_fd, NULL, "file descriptor for assigned device/file or -1 in case of error", NULL},
@@ -583,6 +622,7 @@ static PyGetSetDef Probe_getseters[] = {
     {"sector_size", (getter) Probe_get_sector_size, (setter) Probe_set_sector_size, "block device logical sector size (BLKSSZGET ioctl, default 512).", NULL},
     {"wholedisk_devno", (getter) Probe_get_wholedisk_devno, NULL, "device number of the wholedisk, or 0 for regular files", NULL},
     {"is_wholedisk", (getter) Probe_get_is_wholedisk, NULL, "True if the device is whole-disk, False otherwise", NULL},
+    {"topology", (getter) Probe_get_topology, NULL, "binary interface for topology values", NULL},
     {NULL, NULL, NULL, NULL, NULL}
 };
 

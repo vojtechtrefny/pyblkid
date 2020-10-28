@@ -18,6 +18,7 @@
 
 #include "pyblkid.h"
 #include "probe.h"
+#include "topology.h"
 
 #include <blkid/blkid.h>
 
@@ -78,6 +79,9 @@ PyMODINIT_FUNC PyInit_blkid (void) {
     if (PyType_Ready (&ProbeType) < 0)
         return NULL;
 
+    if (PyType_Ready (&TopologyType) < 0)
+        return NULL;
+
     module = PyModule_Create (&blkidmodule);
     if (!module)
         return NULL;
@@ -114,6 +118,14 @@ PyMODINIT_FUNC PyInit_blkid (void) {
     Py_INCREF (&ProbeType);
     if (PyModule_AddObject (module, "Probe", (PyObject *) &ProbeType) < 0) {
         Py_DECREF (&ProbeType);
+        Py_DECREF (module);
+        return NULL;
+    }
+
+    Py_INCREF (&TopologyType);
+    if (PyModule_AddObject (module, "Topology", (PyObject *) &TopologyType) < 0) {
+        Py_DECREF (&ProbeType);
+        Py_DECREF (&TopologyType);
         Py_DECREF (module);
         return NULL;
     }

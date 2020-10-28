@@ -183,6 +183,25 @@ class ProbeTestCase(unittest.TestCase):
         usage = pr.lookup_value("USAGE")
         self.assertEqual(usage, b"filesystem")
 
+    def test_topology(self):
+        pr = blkid.Probe()
+        pr.set_device(self.loop_dev)
+
+        pr.enable_superblocks(True)
+        pr.set_superblocks_flags(blkid.SUBLKS_TYPE | blkid.SUBLKS_USAGE | blkid.SUBLKS_UUID)
+
+        pr.enable_topology(True)
+
+        ret = pr.do_safeprobe()
+        self.assertTrue(ret)
+
+        self.assertIsNotNone(pr.topology)
+
+        self.assertEqual(pr.topology.alignment_offset, 0)
+        self.assertEqual(pr.topology.logical_sector_size, 512)
+        self.assertEqual(pr.topology.minimum_io_size, 512)
+        self.assertEqual(pr.topology.optimal_io_size, 0)
+        self.assertEqual(pr.topology.physical_sector_size, 512)
 
 if __name__ == "__main__":
     unittest.main()
