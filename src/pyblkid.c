@@ -59,9 +59,76 @@ static PyObject *Blkid_known_fstype (PyObject *self UNUSED, PyObject *args, PyOb
     return PyBool_FromLong (blkid_known_fstype (fstype));
 }
 
+PyDoc_STRVAR(Blkid_send_uevent__doc__,
+"send_uevent (devname, action)\n\n");
+static PyObject *Blkid_send_uevent (PyObject *self UNUSED, PyObject *args, PyObject *kwargs) {
+    const char *devname = NULL;
+    const char *action = NULL;
+    char *kwlist[] = { "devname", "action", NULL };
+    int ret = 0;
+
+    if (!PyArg_ParseTupleAndKeywords (args, kwargs, "ss", kwlist, &devname, &action)) {
+        PyErr_SetString (PyExc_AttributeError, "Failed to parse arguments");
+        return NULL;
+    }
+
+    ret = blkid_send_uevent (devname, action);
+    if (ret < 0) {
+        PyErr_Format (PyExc_RuntimeError, "Failed to send %s uevent do device '%s'", action, devname);
+        return NULL;
+    }
+
+    Py_RETURN_NONE;
+}
+
+static int _Py_Dev_Converter (PyObject *obj, void *p) {
+#ifdef HAVE_LONG_LONG
+    *((dev_t *)p) = PyLong_AsUnsignedLongLong (obj);
+#else
+    *((dev_t *)p) = PyLong_AsUnsignedLong (obj);
+#endif
+    if (PyErr_Occurred ())
+        return 0;
+    return 1;
+}
+
+#ifdef HAVE_LONG_LONG
+    #define _PyLong_FromDev PyLong_FromLongLong
+#else
+    #define _PyLong_FromDev PyLong_FromLong
+#endif
+
+PyDoc_STRVAR(Blkid_devno_to_devname__doc__,
+"devno_to_devname (devno)\n\n"
+"This function finds the pathname to a block device with a given device number.\n");
+static PyObject *Blkid_devno_to_devname (PyObject *self UNUSED, PyObject *args, PyObject *kwargs) {
+    dev_t devno = 0;
+    char *kwlist[] = { "devno", NULL };
+    char *devname = NULL;
+    PyObject *ret = NULL;
+
+    if (!PyArg_ParseTupleAndKeywords (args, kwargs, "O&:devno_to_devname", kwlist, _Py_Dev_Converter, &devno)) {
+        PyErr_SetString (PyExc_AttributeError, "Failed to parse arguments");
+        return NULL;
+    }
+
+    devname = blkid_devno_to_devname (devno);
+    if (!devname) {
+        PyErr_SetString (PyExc_RuntimeError, "Failed to get devname");
+        return NULL;
+    }
+
+    ret = PyUnicode_FromString (devname);
+    free (devname);
+
+    return ret;
+}
+
 static PyMethodDef BlkidMethods[] = {
     {"init_debug", (PyCFunction)(void(*)(void)) Blkid_init_debug, METH_VARARGS|METH_KEYWORDS, Blkid_init_debug__doc__},
     {"known_fstype", (PyCFunction)(void(*)(void)) Blkid_known_fstype, METH_VARARGS|METH_KEYWORDS, Blkid_known_fstype__doc__},
+    {"send_uevent", (PyCFunction)(void(*)(void)) Blkid_send_uevent, METH_VARARGS|METH_KEYWORDS, Blkid_send_uevent__doc__},
+    {"devno_to_devname", (PyCFunction)(void(*)(void)) Blkid_devno_to_devname, METH_VARARGS|METH_KEYWORDS, Blkid_devno_to_devname__doc__},
     {NULL, NULL, 0, NULL}
 };
 

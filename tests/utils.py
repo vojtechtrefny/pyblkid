@@ -14,6 +14,12 @@ def run_command(command):
     return (res.returncode, output)
 
 
+def read_file(filename):
+    with open(filename, "r") as f:
+        content = f.read()
+    return content
+
+
 def loop_setup(filename):
     if filename.endswith(".xz") and not os.path.exists(filename[:-3]):
         ret, out = run_command("xz --decompress --keep %s" % filename)
