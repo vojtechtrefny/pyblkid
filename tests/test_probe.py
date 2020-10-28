@@ -49,20 +49,23 @@ class ProbeTestCase(unittest.TestCase):
         pr.enable_superblocks(True)
         pr.set_superblocks_flags(blkid.SUBLKS_TYPE | blkid.SUBLKS_USAGE | blkid.SUBLKS_MAGIC)
 
-        pr.do_probe()
+        ret = pr.do_probe()
+        self.assertTrue(ret)
 
         usage = pr.lookup_value("USAGE")
         self.assertEqual(usage, b"filesystem")
 
         pr.step_back()
-        pr.do_probe()
+        ret = pr.do_probe()
+        self.assertTrue(ret)
 
         usage = pr.lookup_value("USAGE")
         self.assertEqual(usage, b"filesystem")
 
         pr.reset_buffers()
         pr.step_back()
-        pr.do_probe()
+        ret = pr.do_probe()
+        self.assertTrue(ret)
 
         usage = pr.lookup_value("USAGE")
         self.assertEqual(usage, b"filesystem")
@@ -72,7 +75,8 @@ class ProbeTestCase(unittest.TestCase):
         pr.hide_range(int(offset), len(magic))
 
         pr.step_back()
-        pr.do_probe()
+        ret = pr.do_probe()
+        self.assertFalse(ret)
 
         with self.assertRaises(RuntimeError):
             usage = pr.lookup_value("USAGE")
@@ -84,7 +88,9 @@ class ProbeTestCase(unittest.TestCase):
         pr.enable_superblocks(True)
         pr.set_superblocks_flags(blkid.SUBLKS_TYPE | blkid.SUBLKS_USAGE | blkid.SUBLKS_UUID)
 
-        pr.do_safeprobe()
+        ret = pr.do_safeprobe()
+        self.assertTrue(ret)
+
         usage = pr.lookup_value("USAGE")
         self.assertEqual(usage, b"filesystem")
 
@@ -102,33 +108,38 @@ class ProbeTestCase(unittest.TestCase):
         pr.set_superblocks_flags(blkid.SUBLKS_TYPE | blkid.SUBLKS_USAGE | blkid.SUBLKS_UUID)
 
         pr.filter_superblocks_type(blkid.FLTR_ONLYIN, ["ext3", "ext4"])
-        pr.do_safeprobe()
+        ret = pr.do_safeprobe()
+        self.assertTrue(ret)
 
         fstype = pr.lookup_value("TYPE")
         self.assertEqual(fstype, b"ext3")
 
         pr.filter_superblocks_type(blkid.FLTR_NOTIN, ["ext3", "ext4"])
-        pr.do_safeprobe()
+        ret = pr.do_safeprobe()
+        self.assertFalse(ret)
 
         with self.assertRaises(RuntimeError):
             fstype = pr.lookup_value("TYPE")
 
         pr.filter_superblocks_type(blkid.FLTR_NOTIN, ["vfat", "ntfs"])
-        pr.do_safeprobe()
+        ret = pr.do_safeprobe()
+        self.assertTrue(ret)
 
         fstype = pr.lookup_value("TYPE")
         self.assertEqual(fstype, b"ext3")
 
         # invert the filter
         pr.invert_superblocks_filter()
-        pr.do_safeprobe()
+        ret = pr.do_safeprobe()
+        self.assertFalse(ret)
 
         with self.assertRaises(RuntimeError):
             fstype = pr.lookup_value("TYPE")
 
         # reset to default
         pr.reset_superblocks_filter()
-        pr.do_safeprobe()
+        ret = pr.do_safeprobe()
+        self.assertTrue(ret)
 
         fstype = pr.lookup_value("TYPE")
         self.assertEqual(fstype, b"ext3")

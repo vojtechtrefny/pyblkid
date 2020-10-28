@@ -323,7 +323,8 @@ static PyObject *Probe_lookup_value (ProbeObject *self, PyObject *args, PyObject
 PyDoc_STRVAR(Probe_do_safeprobe__doc__,
 "do_safeprobe ()\n\n"
 "This function gathers probing results from all enabled chains and checks for ambivalent results"
-"(e.g. more filesystems on the device).\n\n"
+"(e.g. more filesystems on the device).\n"
+"Returns True on success, False if nothing is detected.\n\n"
 "Note about superblocks chain -- the function does not check for filesystems when a RAID signature is detected.\n"
 "The function also does not check for collision between RAIDs. The first detected RAID is returned.\n"
 "The function checks for collision between partition table and RAID signature -- it's recommended to "
@@ -337,11 +338,15 @@ static PyObject *Probe_do_safeprobe (ProbeObject *self, PyObject *Py_UNUSED (ign
         return NULL;
     }
 
-    Py_RETURN_NONE;
+    if (ret == 0)
+        Py_RETURN_TRUE;
+    else
+        Py_RETURN_FALSE;
 }
 
 PyDoc_STRVAR(Probe_do_fullprobe__doc__,
 "do_fullprobe ()\n\n"
+"Returns True on success, False if nothing is detected.\n"
 "This function gathers probing results from all enabled chains. Same as do_safeprobe() but "
 "does not check for collision between probing result.");
 static PyObject *Probe_do_fullprobe (ProbeObject *self, PyObject *Py_UNUSED (ignored)) {
@@ -353,12 +358,16 @@ static PyObject *Probe_do_fullprobe (ProbeObject *self, PyObject *Py_UNUSED (ign
         return NULL;
     }
 
-    Py_RETURN_NONE;
+    if (ret == 0)
+        Py_RETURN_TRUE;
+    else
+        Py_RETURN_FALSE;
 }
 
 PyDoc_STRVAR(Probe_do_probe__doc__,
 "do_probe ()\n\n"
-"Calls probing functions in all enabled chains. The superblocks chain is enabled by default."
+"Calls probing functions in all enabled chains. The superblocks chain is enabled by default.\n"
+"Returns True on success, False if nothing is detected.\n\n"
 "The do_probe() stores result from only one probing function. It's necessary to call this routine "
 "in a loop to get results from all probing functions in all chains. The probing is reset by "
 "reset_probe() or by filter functions.");
@@ -371,7 +380,10 @@ static PyObject *Probe_do_probe (ProbeObject *self, PyObject *Py_UNUSED (ignored
         return NULL;
     }
 
-    Py_RETURN_NONE;
+    if (ret == 0)
+        Py_RETURN_TRUE;
+    else
+        Py_RETURN_FALSE;
 }
 
 PyDoc_STRVAR(Probe_step_back__doc__,
