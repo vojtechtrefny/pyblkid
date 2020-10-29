@@ -18,6 +18,7 @@
 
 #include "probe.h"
 #include "topology.h"
+#include "partitions.h"
 
 #include <blkid/blkid.h>
 #include <errno.h>
@@ -34,6 +35,7 @@ PyObject *Probe_new (PyTypeObject *type,  PyObject *args UNUSED, PyObject *kwarg
         self->probe = NULL;
         self->fd = -1;
         self->topology = NULL;
+        self->partlist = NULL;
     }
 
     return (PyObject *) self;
@@ -62,6 +64,9 @@ void Probe_dealloc (ProbeObject *self) {
 
     if (self->topology)
         Py_DECREF (self->topology);
+
+    if (self->partlist)
+        Py_DECREF (self->partlist);
 
     blkid_free_probe (self->probe);
     Py_TYPE (self)->tp_free ((PyObject *) self);
@@ -613,6 +618,17 @@ static PyObject *Probe_get_topology (ProbeObject *self, PyObject *Py_UNUSED (ign
     return self->topology;
 }
 
+static PyObject *Probe_get_partitions (ProbeObject *self, PyObject *Py_UNUSED (ignored)) {
+    if (self->partlist) {
+        Py_INCREF (self->partlist);
+        return self->partlist;
+    }
+
+    self->partlist = _Partlist_get_partlist_object (self->probe);
+
+    return self->partlist;
+}
+
 static PyGetSetDef Probe_getseters[] = {
     {"devno", (getter) Probe_get_devno, NULL, "block device number, or 0 for regular files", NULL},
     {"fd", (getter) Probe_get_fd, NULL, "file descriptor for assigned device/file or -1 in case of error", NULL},
@@ -623,6 +639,7 @@ static PyGetSetDef Probe_getseters[] = {
     {"wholedisk_devno", (getter) Probe_get_wholedisk_devno, NULL, "device number of the wholedisk, or 0 for regular files", NULL},
     {"is_wholedisk", (getter) Probe_get_is_wholedisk, NULL, "True if the device is whole-disk, False otherwise", NULL},
     {"topology", (getter) Probe_get_topology, NULL, "binary interface for topology values", NULL},
+    {"partitions", (getter) Probe_get_partitions, NULL, "binary interface for partitions", NULL},
     {NULL, NULL, NULL, NULL, NULL}
 };
 

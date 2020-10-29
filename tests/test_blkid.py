@@ -25,6 +25,9 @@ class BlkidTestCase(unittest.TestCase):
         self.assertTrue(blkid.known_fstype("ext4"))
         self.assertFalse(blkid.known_fstype("not-a-filesystem"))
 
+        self.assertTrue(blkid.known_pttype("dos"))
+        self.assertFalse(blkid.known_fstype("not-a-partition-table"))
+
     def test_uevent(self):
         with self.assertRaises(RuntimeError):
             blkid.send_uevent("not-a-device", "change")

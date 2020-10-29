@@ -26,6 +26,7 @@ typedef struct {
     PyObject_HEAD
     blkid_probe probe;
     PyObject *topology;
+    PyObject *partlist;
     int fd;
 } ProbeObject;
 

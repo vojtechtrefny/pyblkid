@@ -19,6 +19,7 @@
 #include "pyblkid.h"
 #include "probe.h"
 #include "topology.h"
+#include "partitions.h"
 
 #include <blkid/blkid.h>
 
@@ -81,6 +82,21 @@ static PyObject *Blkid_send_uevent (PyObject *self UNUSED, PyObject *args, PyObj
     Py_RETURN_NONE;
 }
 
+PyDoc_STRVAR(Blkid_known_pttype__doc__,
+"known_pttype (pttype)\n\n"
+"Returns whether pttype is a known partition type or not.\n");
+static PyObject *Blkid_known_pttype (PyObject *self UNUSED, PyObject *args, PyObject *kwargs) {
+    const char *pttype = NULL;
+    char *kwlist[] = { "pttype", NULL };
+
+    if (!PyArg_ParseTupleAndKeywords (args, kwargs, "s", kwlist, &pttype)) {
+        PyErr_SetString (PyExc_AttributeError, "Failed to parse arguments");
+        return NULL;
+    }
+
+    return PyBool_FromLong (blkid_known_pttype (pttype));
+}
+
 static int _Py_Dev_Converter (PyObject *obj, void *p) {
 #ifdef HAVE_LONG_LONG
     *((dev_t *)p) = PyLong_AsUnsignedLongLong (obj);
@@ -129,6 +145,7 @@ static PyMethodDef BlkidMethods[] = {
     {"known_fstype", (PyCFunction)(void(*)(void)) Blkid_known_fstype, METH_VARARGS|METH_KEYWORDS, Blkid_known_fstype__doc__},
     {"send_uevent", (PyCFunction)(void(*)(void)) Blkid_send_uevent, METH_VARARGS|METH_KEYWORDS, Blkid_send_uevent__doc__},
     {"devno_to_devname", (PyCFunction)(void(*)(void)) Blkid_devno_to_devname, METH_VARARGS|METH_KEYWORDS, Blkid_devno_to_devname__doc__},
+    {"known_pttype", (PyCFunction)(void(*)(void)) Blkid_known_pttype, METH_VARARGS|METH_KEYWORDS, Blkid_known_pttype__doc__},
     {NULL, NULL, 0, NULL}
 };
 
@@ -147,6 +164,12 @@ PyMODINIT_FUNC PyInit_blkid (void) {
         return NULL;
 
     if (PyType_Ready (&TopologyType) < 0)
+        return NULL;
+
+    if (PyType_Ready (&PartlistType) < 0)
+        return NULL;
+
+    if (PyType_Ready (&ParttableType) < 0)
         return NULL;
 
     module = PyModule_Create (&blkidmodule);
@@ -193,6 +216,25 @@ PyMODINIT_FUNC PyInit_blkid (void) {
     if (PyModule_AddObject (module, "Topology", (PyObject *) &TopologyType) < 0) {
         Py_DECREF (&ProbeType);
         Py_DECREF (&TopologyType);
+        Py_DECREF (module);
+        return NULL;
+    }
+
+    Py_INCREF (&PartlistType);
+    if (PyModule_AddObject (module, "Partlist", (PyObject *) &PartlistType) < 0) {
+        Py_DECREF (&ProbeType);
+        Py_DECREF (&TopologyType);
+        Py_DECREF (&PartlistType);
+        Py_DECREF (module);
+        return NULL;
+    }
+
+    Py_INCREF (&ParttableType);
+    if (PyModule_AddObject (module, "Parttable", (PyObject *) &ParttableType) < 0) {
+        Py_DECREF (&ProbeType);
+        Py_DECREF (&TopologyType);
+        Py_DECREF (&PartlistType);
+        Py_DECREF (&ParttableType);
         Py_DECREF (module);
         return NULL;
     }
