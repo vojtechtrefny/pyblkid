@@ -7,7 +7,7 @@ import blkid
 
 
 @unittest.skipUnless(os.geteuid() == 0, "requires root access")
-class ProbeTestCase(unittest.TestCase):
+class PartitionsTestCase(unittest.TestCase):
 
     test_image = "gpt.img.xz"
     loop_dev = None
