@@ -92,6 +92,9 @@ class PartitionsTestCase(unittest.TestCase):
         self.assertEqual(pr.partitions.table.id, "dd27f98d-7519-4c9e-8041-f2bfa7b1ef61")
         self.assertEqual(pr.partitions.table.offset, 512)
 
+        nested = pr.partitions.table.get_parent()
+        self.assertIsNone(nested)
+
     def test_partition(self):
         pr = blkid.Probe()
         pr.set_device(self.loop_dev)

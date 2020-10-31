@@ -210,6 +210,35 @@ PyObject *_Parttable_get_parttable_object (blkid_partlist partlist) {
     return (PyObject *) result;
 }
 
+PyDoc_STRVAR(Parttable_get_parent__doc__,
+"get_parent ()\n\n"
+"Parent for nested partition tables.");
+static PyObject *Parttable_get_parent (ParttableObject *self, PyObject *Py_UNUSED (ignored)) {
+    blkid_partition blkid_part = NULL;
+    PartitionObject *result = NULL;
+
+    blkid_part = blkid_parttable_get_parent (self->table);
+    if (!blkid_part)
+        Py_RETURN_NONE;
+
+    result = PyObject_New (PartitionObject, &PartitionType);
+    if (!result) {
+        PyErr_SetString (PyExc_MemoryError, "Failed to create a new Partition object");
+        return NULL;
+    }
+
+    Py_INCREF (result);
+    result->number = 0;
+    result->partition = blkid_part;
+
+    return (PyObject *) result;
+}
+
+static PyMethodDef Parttable_methods[] = {
+    {"get_parent", (PyCFunction)(void(*)(void)) Parttable_get_parent, METH_NOARGS, Parttable_get_parent__doc__},
+    {NULL, NULL, 0, NULL},
+};
+
 static PyObject *Parrtable_get_type (ParttableObject *self, PyObject *Py_UNUSED (ignored)) {
     const char *pttype = blkid_parttable_get_type (self->table);
 
@@ -244,6 +273,7 @@ PyTypeObject ParttableType = {
     .tp_new = Parttable_new,
     .tp_dealloc = (destructor) Parttable_dealloc,
     .tp_init = (initproc) Parttable_init,
+    .tp_methods = Parttable_methods,
     .tp_getset = Parttable_getseters,
 };
 
