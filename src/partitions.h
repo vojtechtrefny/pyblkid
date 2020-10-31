@@ -50,4 +50,16 @@ void Parttable_dealloc (ParttableObject *self);
 
 PyObject *_Parttable_get_parttable_object (blkid_partlist partlist);
 
+typedef struct {
+    PyObject_HEAD
+    int number;
+    blkid_partition partition;
+} PartitionObject;
+
+extern PyTypeObject PartitionType;
+
+PyObject *Partition_new (PyTypeObject *type,  PyObject *args, PyObject *kwargs);
+int Partition_init (PartitionObject *self, PyObject *args, PyObject *kwargs);
+void Partition_dealloc (PartitionObject *self);
+
 #endif /* PARTITIONS_H */
