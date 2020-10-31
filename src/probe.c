@@ -364,6 +364,16 @@ PyDoc_STRVAR(Probe_do_safeprobe__doc__,
 static PyObject *Probe_do_safeprobe (ProbeObject *self, PyObject *Py_UNUSED (ignored)) {
     int ret = 0;
 
+    if (self->topology) {
+        Py_DECREF (self->topology);
+        self->topology = NULL;
+    }
+
+    if (self->partlist) {
+        Py_DECREF (self->partlist);
+        self->partlist = NULL;
+    }
+
     ret = blkid_do_safeprobe (self->probe);
     if (ret < 0) {
         PyErr_SetString (PyExc_RuntimeError, "Failed to safeprobe the device");
@@ -383,6 +393,16 @@ PyDoc_STRVAR(Probe_do_fullprobe__doc__,
 "does not check for collision between probing result.");
 static PyObject *Probe_do_fullprobe (ProbeObject *self, PyObject *Py_UNUSED (ignored)) {
     int ret = 0;
+
+    if (self->topology) {
+        Py_DECREF (self->topology);
+        self->topology = NULL;
+    }
+
+    if (self->partlist) {
+        Py_DECREF (self->partlist);
+        self->partlist = NULL;
+    }
 
     ret = blkid_do_fullprobe (self->probe);
     if (ret < 0) {
@@ -405,6 +425,16 @@ PyDoc_STRVAR(Probe_do_probe__doc__,
 "reset_probe() or by filter functions.");
 static PyObject *Probe_do_probe (ProbeObject *self, PyObject *Py_UNUSED (ignored)) {
     int ret = 0;
+
+    if (self->topology) {
+        Py_DECREF (self->topology);
+        self->topology = NULL;
+    }
+
+    if (self->partlist) {
+        Py_DECREF (self->partlist);
+        self->partlist = NULL;
+    }
 
     ret = blkid_do_probe (self->probe);
     if (ret < 0) {
@@ -460,6 +490,16 @@ PyDoc_STRVAR(Probe_reset_probe__doc__,
 "This function does not touch probing filters and keeps assigned device.");
 static PyObject *Probe_reset_probe (ProbeObject *self, PyObject *Py_UNUSED (ignored)) {
     blkid_reset_probe (self->probe);
+
+    if (self->topology) {
+        Py_DECREF (self->topology);
+        self->topology = NULL;
+    }
+
+    if (self->partlist) {
+        Py_DECREF (self->partlist);
+        self->partlist = NULL;
+    }
 
     Py_RETURN_NONE;
 }
