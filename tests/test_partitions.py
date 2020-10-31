@@ -22,6 +22,60 @@ class PartitionsTestCase(unittest.TestCase):
         if cls.loop_dev:
             utils.loop_teardown(cls.loop_dev)
 
+    def test_partlist(self):
+        pr = blkid.Probe()
+        pr.set_device(self.loop_dev)
+
+        pr.enable_partitions(True)
+
+        ret = pr.do_safeprobe()
+        self.assertTrue(ret)
+
+        plist = pr.partitions
+        self.assertEqual(plist.numof_partitions, 5)
+
+    def test_partitions_filter(self):
+        pr = blkid.Probe()
+        pr.set_device(self.loop_dev)
+
+        pr.enable_partitions(True)
+
+        ret = pr.do_safeprobe()
+        self.assertTrue(ret)
+        self.assertEqual(pr.partitions.numof_partitions, 5)
+
+        pr.filter_partitions_type(blkid.FLTR_ONLYIN, ["gpt"])
+        ret = pr.do_safeprobe()
+        self.assertTrue(ret)
+        self.assertEqual(pr.partitions.numof_partitions, 5)
+
+        pr.filter_partitions_type(blkid.FLTR_ONLYIN, ["gpt", "dos"])
+        ret = pr.do_safeprobe()
+        self.assertTrue(ret)
+        self.assertEqual(pr.partitions.numof_partitions, 5)
+
+        pr.filter_partitions_type(blkid.FLTR_NOTIN, ["gpt"])
+        ret = pr.do_safeprobe()
+        self.assertFalse(ret)
+        with self.assertRaises(RuntimeError):
+            pr.partitions
+
+        pr.invert_partitions_filter()
+        ret = pr.do_safeprobe()
+        self.assertTrue(ret)
+        self.assertEqual(pr.partitions.numof_partitions, 5)
+
+        pr.filter_partitions_type(blkid.FLTR_NOTIN, ["gpt"])
+        ret = pr.do_safeprobe()
+        self.assertFalse(ret)
+        with self.assertRaises(RuntimeError):
+            pr.partitions
+
+        pr.reset_partitions_filter()
+        ret = pr.do_safeprobe()
+        self.assertTrue(ret)
+        self.assertEqual(pr.partitions.numof_partitions, 5)
+
     def test_partition_table(self):
         pr = blkid.Probe()
         pr.set_device(self.loop_dev)
