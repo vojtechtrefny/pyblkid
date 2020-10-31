@@ -135,8 +135,22 @@ static PyObject *Partlist_get_table (PartlistObject *self, PyObject *Py_UNUSED (
     return self->Parttable_object;
 }
 
+static PyObject *Partlist_get_numof_partitions (PartlistObject *self, PyObject *Py_UNUSED (ignored)) {
+    int ret = 0;
+
+    ret = blkid_partlist_numof_partitions (self->partlist);
+    if (ret < 0) {
+        PyErr_SetString (PyExc_MemoryError, "Failed to get number of partitions");
+        return NULL;
+    }
+
+    return PyLong_FromLong (ret);
+}
+
+
 static PyGetSetDef Partlist_getseters[] = {
     {"table", (getter) Partlist_get_table, NULL, "binary interface for partition table on the device", NULL},
+    {"numof_partitions", (getter) Partlist_get_numof_partitions, NULL, "number of partitions in the list", NULL},
     {NULL, NULL, NULL, NULL, NULL}
 };
 
