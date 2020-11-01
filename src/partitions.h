@@ -54,6 +54,7 @@ typedef struct {
     PyObject_HEAD
     int number;
     blkid_partition partition;
+    PyObject *Parttable_object;
 } PartitionObject;
 
 extern PyTypeObject PartitionType;

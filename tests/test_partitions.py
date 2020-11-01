@@ -118,3 +118,7 @@ class PartitionsTestCase(unittest.TestCase):
         self.assertEqual(part.partno, 1)
         self.assertEqual(part.start, 34)
         self.assertEqual(part.size, 2014)
+
+        # no nested partition table here, just the gpt
+        table = part.table
+        self.assertEqual(table.type, "gpt")

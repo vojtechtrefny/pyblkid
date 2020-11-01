@@ -376,6 +376,44 @@ static PyObject *Partition_get_start (PartitionObject *self, PyObject *Py_UNUSED
     return PyLong_FromLongLong (start);
 }
 
+PyObject *_Partition_get_parttable_object (blkid_partition partition) {
+    ParttableObject *result = NULL;
+    blkid_parttable table = NULL;
+
+    if (!partition) {
+        PyErr_SetString(PyExc_RuntimeError, "internal error");
+        return NULL;
+    }
+
+    table = blkid_partition_get_table (partition);
+    if (!table) {
+        PyErr_SetString (PyExc_RuntimeError, "Failed to get partition table");
+        return NULL;
+    }
+
+    result = PyObject_New (ParttableObject, &ParttableType);
+    if (!result) {
+        PyErr_SetString (PyExc_MemoryError, "Failed to create a new Parttable object");
+        return NULL;
+    }
+    Py_INCREF (result);
+
+    result->table = table;
+
+    return (PyObject *) result;
+}
+
+static PyObject *Partition_get_table (PartitionObject *self, PyObject *Py_UNUSED (ignored)) {
+    if (self->Parttable_object) {
+        Py_INCREF (self->Parttable_object);
+        return self->Parttable_object;
+    }
+
+    self->Parttable_object = _Partition_get_parttable_object (self->partition);
+
+    return self->Parttable_object;
+}
+
 static PyGetSetDef Partition_getseters[] = {
     {"type", (getter) Partition_get_type, NULL, "partition type", NULL},
     {"type_string", (getter) Partition_get_type_string, NULL, "partition type string, note the type string is supported by a small subset of partition tables (e.g Mac and EFI GPT)", NULL},
@@ -388,6 +426,7 @@ static PyGetSetDef Partition_getseters[] = {
     {"partno", (getter) Partition_get_partno, NULL, "proposed partition number (e.g. 'N' from sda'N') or -1 in case of error", NULL},
     {"size", (getter) Partition_get_size, NULL, "size of the partition (in 512-sectors)", NULL},
     {"start", (getter) Partition_get_start, NULL, "start of the partition (in 512-sectors)", NULL},
+    {"table", (getter) Partition_get_table, NULL, "partition table object (usually the same for all partitions, except nested partition tables)", NULL},
     {NULL, NULL, NULL, NULL, NULL}
 };
 
