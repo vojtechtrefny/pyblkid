@@ -86,7 +86,6 @@ static PyObject *Probe_set_device (ProbeObject *self, PyObject *args, PyObject *
     int flags = O_RDONLY|O_CLOEXEC;
 
     if (!PyArg_ParseTupleAndKeywords (args, kwargs, "s|iKK", kwlist, &device, &flags, &offset, &size)) {
-        PyErr_SetString (PyExc_AttributeError, "Failed to parse arguments");
         return NULL;
     }
 
@@ -114,7 +113,6 @@ static PyObject *Probe_enable_superblocks (ProbeObject *self, PyObject *args, Py
     char *kwlist[] = { "enable", NULL };
 
     if (!PyArg_ParseTupleAndKeywords(args, kwargs, "p", kwlist, &enable)) {
-        PyErr_SetString (PyExc_AttributeError, "Failed to parse arguments");
         return NULL;
     }
 
@@ -137,7 +135,6 @@ static PyObject *Probe_set_superblocks_flags (ProbeObject *self, PyObject *args,
     char *kwlist[] = { "flags", NULL };
 
     if (!PyArg_ParseTupleAndKeywords(args, kwargs, "i", kwlist, &flags)) {
-        PyErr_SetString (PyExc_AttributeError, "Failed to parse arguments");
         return NULL;
     }
 
@@ -166,7 +163,6 @@ static PyObject *Probe_filter_superblocks_type (ProbeObject *self, PyObject *arg
     char *kwlist[] = { "flag", "names", NULL };
 
     if (!PyArg_ParseTupleAndKeywords(args, kwargs, "iO", kwlist, &flag, &pynames)) {
-        PyErr_SetString (PyExc_AttributeError, "Failed to parse arguments");
         return NULL;
     }
 
@@ -219,7 +215,6 @@ static PyObject *Probe_filter_superblocks_usage (ProbeObject *self, PyObject *ar
     char *kwlist[] = { "flag", "usage", NULL };
 
     if (!PyArg_ParseTupleAndKeywords(args, kwargs, "ii", kwlist, &flag, &usage)) {
-        PyErr_SetString (PyExc_AttributeError, "Failed to parse arguments");
         return NULL;
     }
 
@@ -271,7 +266,6 @@ static PyObject *Probe_enable_partitions (ProbeObject *self, PyObject *args, PyO
     char *kwlist[] = { "enable", NULL };
 
     if (!PyArg_ParseTupleAndKeywords(args, kwargs, "p", kwlist, &enable)) {
-        PyErr_SetString (PyExc_AttributeError, "Failed to parse arguments");
         return NULL;
     }
 
@@ -294,7 +288,6 @@ static PyObject *Probe_set_partitions_flags (ProbeObject *self, PyObject *args, 
     char *kwlist[] = { "flags", NULL };
 
     if (!PyArg_ParseTupleAndKeywords(args, kwargs, "i", kwlist, &flags)) {
-        PyErr_SetString (PyExc_AttributeError, "Failed to parse arguments");
         return NULL;
     }
 
@@ -323,7 +316,6 @@ static PyObject *Probe_filter_partitions_type (ProbeObject *self, PyObject *args
     char *kwlist[] = { "flag", "names", NULL };
 
     if (!PyArg_ParseTupleAndKeywords(args, kwargs, "iO", kwlist, &flag, &pynames)) {
-        PyErr_SetString (PyExc_AttributeError, "Failed to parse arguments");
         return NULL;
     }
 
@@ -402,7 +394,6 @@ static PyObject *Probe_enable_topology (ProbeObject *self, PyObject *args, PyObj
     char *kwlist[] = { "enable", NULL };
 
     if (!PyArg_ParseTupleAndKeywords(args, kwargs, "p", kwlist, &enable)) {
-        PyErr_SetString (PyExc_AttributeError, "Failed to parse arguments");
         return NULL;
     }
 
@@ -425,7 +416,6 @@ static PyObject *Probe_lookup_value (ProbeObject *self, PyObject *args, PyObject
     const char *value = NULL;
 
     if (!PyArg_ParseTupleAndKeywords(args, kwargs, "s", kwlist, &name)) {
-        PyErr_SetString (PyExc_AttributeError, "Failed to parse arguments");
         return NULL;
     }
 
@@ -604,7 +594,6 @@ static PyObject *Probe_hide_range (ProbeObject *self, PyObject *args, PyObject *
     uint64_t length = 0;
 
     if (!PyArg_ParseTupleAndKeywords(args, kwargs, "ii", kwlist, &offset, &length)) {
-        PyErr_SetString (PyExc_AttributeError, "Failed to parse arguments");
         return NULL;
     }
 
@@ -631,7 +620,6 @@ static PyObject *Probe_do_wipe (ProbeObject *self, PyObject *args, PyObject *kwa
     bool dryrun = false;
 
     if (!PyArg_ParseTupleAndKeywords(args, kwargs, "|p", kwlist, &dryrun)) {
-        PyErr_SetString (PyExc_AttributeError, "Failed to parse arguments");
         return NULL;
     }
 

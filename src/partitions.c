@@ -85,7 +85,6 @@ static PyObject *Partlist_get_partition (PartlistObject *self, PyObject *args, P
     PartitionObject *result = NULL;
 
     if (!PyArg_ParseTupleAndKeywords (args, kwargs, "i", kwlist, &partnum)) {
-        PyErr_SetString (PyExc_AttributeError, "Failed to parse arguments");
         return NULL;
     }
 
@@ -288,7 +287,6 @@ int Partition_init (PartitionObject *self, PyObject *args, PyObject *kwargs) {
     char *kwlist[] = { "number", NULL };
 
      if (!PyArg_ParseTupleAndKeywords (args, kwargs, "i", kwlist, &(self->number))) {
-        PyErr_SetString (PyExc_AttributeError, "Failed to parse arguments");
         return -1;
     }
 

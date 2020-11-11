@@ -39,7 +39,6 @@ int Cache_init (CacheObject *self UNUSED, PyObject *args, PyObject *kwargs) {
     int ret = 0;
 
     if (!PyArg_ParseTupleAndKeywords (args, kwargs, "|s", kwlist, &filename)) {
-        PyErr_SetString (PyExc_AttributeError, "Failed to parse arguments");
         return -1;
     }
 
@@ -67,7 +66,6 @@ static PyObject *Cache_probe_all (CacheObject *self, PyObject *args, PyObject *k
     int ret = 0;
 
      if (!PyArg_ParseTupleAndKeywords (args, kwargs, "|p", kwlist, &removable)) {
-        PyErr_SetString (PyExc_AttributeError, "Failed to parse arguments");
         return NULL;
     }
 
