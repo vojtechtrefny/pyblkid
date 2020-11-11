@@ -20,6 +20,7 @@
 #include "probe.h"
 #include "topology.h"
 #include "partitions.h"
+#include "cache.h"
 
 #include <blkid/blkid.h>
 
@@ -175,6 +176,9 @@ PyMODINIT_FUNC PyInit_blkid (void) {
     if (PyType_Ready (&PartitionType) < 0)
         return NULL;
 
+    if (PyType_Ready (&CacheType) < 0)
+        return NULL;
+
     module = PyModule_Create (&blkidmodule);
     if (!module)
         return NULL;
@@ -249,6 +253,18 @@ PyMODINIT_FUNC PyInit_blkid (void) {
         Py_DECREF (&PartlistType);
         Py_DECREF (&ParttableType);
         Py_DECREF (&PartitionType);
+        Py_DECREF (module);
+        return NULL;
+    }
+
+    Py_INCREF (&CacheType);
+    if (PyModule_AddObject (module, "Cache", (PyObject *) &CacheType) < 0) {
+        Py_DECREF (&ProbeType);
+        Py_DECREF (&TopologyType);
+        Py_DECREF (&PartlistType);
+        Py_DECREF (&ParttableType);
+        Py_DECREF (&PartitionType);
+        Py_DECREF (&CacheType);
         Py_DECREF (module);
         return NULL;
     }

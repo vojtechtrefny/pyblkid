@@ -25,6 +25,7 @@ def main():
                                  sources = ["src/pyblkid.c",
                                             "src/topology.c",
                                             "src/partitions.c",
+                                            "src/cache.c",
                                             "src/probe.c",],
                                  include_dirs = ["/usr/include"],
                                  libraries = ["blkid"],
