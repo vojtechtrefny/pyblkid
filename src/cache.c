@@ -80,7 +80,7 @@ static PyObject *Cache_probe_all (CacheObject *self, PyObject *args, PyObject *k
         if (ret < 0) {
         PyErr_SetString (PyExc_RuntimeError, "Failed to probe removable devices");
         return NULL;
-    }
+        }
     }
 
     Py_RETURN_NONE;
