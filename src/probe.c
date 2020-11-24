@@ -655,6 +655,7 @@ static PyMethodDef Probe_methods[] = {
     {"invert_superblocks_filter", (PyCFunction) Probe_invert_superblocks_filter, METH_NOARGS, Probe_invert_superblocks_filter__doc__},
     {"reset_superblocks_filter", (PyCFunction) Probe_reset_superblocks_filter, METH_NOARGS, Probe_reset_superblocks_filter__doc__},
     {"lookup_value", (PyCFunction)(void(*)(void)) Probe_lookup_value, METH_VARARGS|METH_KEYWORDS, Probe_lookup_value__doc__},
+    {NULL, NULL, 0, NULL}
 };
 
 static PyObject *Probe_get_devno (ProbeObject *self, PyObject *Py_UNUSED (ignored)) {
