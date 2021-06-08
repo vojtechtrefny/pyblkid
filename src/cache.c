@@ -86,8 +86,18 @@ static PyObject *Cache_probe_all (CacheObject *self, PyObject *args, PyObject *k
     Py_RETURN_NONE;
 }
 
+PyDoc_STRVAR(Cache_gc__doc__,
+"gc\n\n"
+"Removes garbage (non-existing devices) from the cache.");
+static PyObject *Cache_gc (CacheObject *self, PyObject *Py_UNUSED (ignored))  {
+    blkid_gc_cache (self->cache);
+
+    Py_RETURN_NONE;
+}
+
 static PyMethodDef Cache_methods[] = {
     {"probe_all", (PyCFunction)(void(*)(void)) Cache_probe_all, METH_VARARGS|METH_KEYWORDS, Cache_probe_all__doc__},
+    {"gc", (PyCFunction) Cache_gc, METH_NOARGS, Cache_gc__doc__},
     {NULL, NULL, 0, NULL},
 };
 

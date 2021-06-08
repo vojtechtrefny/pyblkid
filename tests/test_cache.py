@@ -33,6 +33,7 @@ class CacheTestCase(unittest.TestCase):
         cache = blkid.Cache(filename=cls.cache_file)
         cache.probe_all()
         cache.probe_all(removable=True)
+        cache.gc()
 
 if __name__ == "__main__":
     unittest.main()
