@@ -114,6 +114,7 @@ static PyObject *Partlist_get_partition (PartlistObject *self, PyObject *args, P
     Py_INCREF (result);
     result->number = partnum;
     result->partition = blkid_part;
+    result->Parttable_object = NULL;
 
     return (PyObject *) result;
 }
@@ -280,6 +281,9 @@ PyTypeObject ParttableType = {
 PyObject *Partition_new (PyTypeObject *type,  PyObject *args UNUSED, PyObject *kwargs UNUSED) {
     PartitionObject *self = (PartitionObject*) type->tp_alloc (type, 0);
 
+    if (self)
+        self->Parttable_object = NULL;
+
     return (PyObject *) self;
 }
 
@@ -296,6 +300,9 @@ int Partition_init (PartitionObject *self, PyObject *args, PyObject *kwargs) {
 }
 
 void Partition_dealloc (PartitionObject *self) {
+    if (self->Parttable_object)
+        Py_DECREF (self->Parttable_object);
+
     Py_TYPE (self)->tp_free ((PyObject *) self);
 }
 

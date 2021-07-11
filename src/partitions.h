@@ -63,4 +63,6 @@ PyObject *Partition_new (PyTypeObject *type,  PyObject *args, PyObject *kwargs);
 int Partition_init (PartitionObject *self, PyObject *args, PyObject *kwargs);
 void Partition_dealloc (PartitionObject *self);
 
+PyObject *_Partition_get_parttable_object (blkid_partition partition);
+
 #endif /* PARTITIONS_H */
