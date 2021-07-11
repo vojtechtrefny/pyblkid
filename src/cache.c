@@ -65,7 +65,7 @@ static PyObject *Cache_probe_all (CacheObject *self, PyObject *args, PyObject *k
     char *kwlist[] = { "removable", NULL };
     int ret = 0;
 
-     if (!PyArg_ParseTupleAndKeywords (args, kwargs, "|p", kwlist, &removable)) {
+    if (!PyArg_ParseTupleAndKeywords (args, kwargs, "|p", kwlist, &removable)) {
         return NULL;
     }
 
