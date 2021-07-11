@@ -29,11 +29,15 @@ class CacheTestCase(unittest.TestCase):
         if cls.cache_file:
             os.remove(cls.cache_file)
 
-    def test_cache(cls):
-        cache = blkid.Cache(filename=cls.cache_file)
+    def test_cache(self):
+        cache = blkid.Cache(filename=self.cache_file)
         cache.probe_all()
         cache.probe_all(removable=True)
         cache.gc()
+
+        device = cache.get_device(self.loop_dev)
+        self.assertIsNotNone(device)
+        self.assertEqual(device.devname, self.loop_dev)
 
 if __name__ == "__main__":
     unittest.main()

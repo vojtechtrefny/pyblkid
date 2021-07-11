@@ -297,6 +297,9 @@ PyMODINIT_FUNC PyInit_blkid (void) {
     if (PyType_Ready (&CacheType) < 0)
         return NULL;
 
+    if (PyType_Ready (&DeviceType) < 0)
+        return NULL;
+
     module = PyModule_Create (&blkidmodule);
     if (!module)
         return NULL;
@@ -383,6 +386,19 @@ PyMODINIT_FUNC PyInit_blkid (void) {
         Py_DECREF (&ParttableType);
         Py_DECREF (&PartitionType);
         Py_DECREF (&CacheType);
+        Py_DECREF (module);
+        return NULL;
+    }
+
+    Py_INCREF (&DeviceType);
+    if (PyModule_AddObject (module, "Device", (PyObject *) &DeviceType) < 0) {
+        Py_DECREF (&ProbeType);
+        Py_DECREF (&TopologyType);
+        Py_DECREF (&PartlistType);
+        Py_DECREF (&ParttableType);
+        Py_DECREF (&PartitionType);
+        Py_DECREF (&CacheType);
+        Py_DECREF (&DeviceType);
         Py_DECREF (module);
         return NULL;
     }

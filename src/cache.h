@@ -33,4 +33,11 @@ PyObject *Cache_new (PyTypeObject *type,  PyObject *args, PyObject *kwargs);
 int Cache_init (CacheObject *self, PyObject *args, PyObject *kwargs);
 void Cache_dealloc (CacheObject *self);
 
+typedef struct {
+    PyObject_HEAD
+    blkid_dev device;
+} DeviceObject;
+
+extern PyTypeObject DeviceType;
+
 #endif /* CACHE_H */

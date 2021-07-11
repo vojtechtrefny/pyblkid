@@ -95,9 +95,38 @@ static PyObject *Cache_gc (CacheObject *self, PyObject *Py_UNUSED (ignored))  {
     Py_RETURN_NONE;
 }
 
+PyDoc_STRVAR(Cache_get_device__doc__,
+"get_device (name)\n\n"
+"Get device from cache.\n\n");
+static PyObject *Cache_get_device (CacheObject *self, PyObject *args, PyObject *kwargs) {
+    const char *name = NULL;
+    char *kwlist[] = { "name", NULL };
+    blkid_dev device = NULL;
+    DeviceObject *dev_obj = NULL;
+
+    if (!PyArg_ParseTupleAndKeywords (args, kwargs, "s", kwlist, &name))
+        return NULL;
+
+    device = blkid_get_dev (self->cache, name, BLKID_DEV_FIND);
+    if (device == NULL)
+        Py_RETURN_NONE;
+
+    dev_obj = PyObject_New (DeviceObject, &DeviceType);
+    if (!dev_obj) {
+        PyErr_SetString (PyExc_MemoryError, "Failed to create a new Device object");
+        return NULL;
+    }
+
+    dev_obj->device = device;
+
+    Py_INCREF (dev_obj);
+    return (PyObject *)  dev_obj;
+}
+
 static PyMethodDef Cache_methods[] = {
     {"probe_all", (PyCFunction)(void(*)(void)) Cache_probe_all, METH_VARARGS|METH_KEYWORDS, Cache_probe_all__doc__},
     {"gc", (PyCFunction) Cache_gc, METH_NOARGS, Cache_gc__doc__},
+    {"get_device", (PyCFunction)(void(*)(void)) Cache_get_device, METH_VARARGS|METH_KEYWORDS, Cache_get_device__doc__},
     {NULL, NULL, 0, NULL},
 };
 
@@ -111,4 +140,48 @@ PyTypeObject CacheType = {
     .tp_dealloc = (destructor) Cache_dealloc,
     .tp_init = (initproc) Cache_init,
     .tp_methods = Cache_methods,
+};
+
+/*********************** DEVICE ***********************/
+PyObject *Device_new (PyTypeObject *type,  PyObject *args UNUSED, PyObject *kwargs UNUSED) {
+    DeviceObject *self = (DeviceObject*) type->tp_alloc (type, 0);
+
+    if (self)
+        self->device = NULL;
+
+    return (PyObject *) self;
+}
+
+int Device_init (DeviceObject *self UNUSED, PyObject *args UNUSED, PyObject *kwargs UNUSED) {
+    return 0;
+}
+
+void Device_dealloc (DeviceObject *self) {
+    Py_TYPE (self)->tp_free ((PyObject *) self);
+}
+
+static PyObject *Device_get_devname (DeviceObject *self, PyObject *Py_UNUSED (ignored)) {
+    const char *name = blkid_dev_devname (self->device);
+
+    if (!name)
+        Py_RETURN_NONE;
+
+    return PyUnicode_FromString (name);
+}
+
+static PyGetSetDef Device_getseters[] = {
+    {"devname", (getter) Device_get_devname, NULL, "returns the name previously used for Cache.get_device.", NULL},
+    {NULL, NULL, NULL, NULL, NULL}
+};
+
+PyTypeObject DeviceType = {
+    PyVarObject_HEAD_INIT (NULL, 0)
+    .tp_name = "blkid.Device",
+    .tp_basicsize = sizeof (DeviceObject),
+    .tp_itemsize = 0,
+    .tp_flags = Py_TPFLAGS_DEFAULT,
+    .tp_new = Device_new,
+    .tp_dealloc = (destructor) Device_dealloc,
+    .tp_init = (initproc) Device_init,
+    .tp_getset = Device_getseters,
 };
