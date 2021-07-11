@@ -36,10 +36,8 @@ static PyObject *Blkid_init_debug (PyObject *self UNUSED, PyObject *args, PyObje
     int mask = 0;
     char *kwlist[] = { "mask", NULL };
 
-    if (!PyArg_ParseTupleAndKeywords (args, kwargs, "|i", kwlist, &mask)) {
-        PyErr_SetString (PyExc_AttributeError, "Failed to parse arguments");
+    if (!PyArg_ParseTupleAndKeywords (args, kwargs, "|i", kwlist, &mask))
         return NULL;
-    }
 
     blkid_init_debug (mask);
 
@@ -53,10 +51,8 @@ static PyObject *Blkid_known_fstype (PyObject *self UNUSED, PyObject *args, PyOb
     const char *fstype = NULL;
     char *kwlist[] = { "fstype", NULL };
 
-    if (!PyArg_ParseTupleAndKeywords (args, kwargs, "s", kwlist, &fstype)) {
-        PyErr_SetString (PyExc_AttributeError, "Failed to parse arguments");
+    if (!PyArg_ParseTupleAndKeywords (args, kwargs, "s", kwlist, &fstype))
         return NULL;
-    }
 
     return PyBool_FromLong (blkid_known_fstype (fstype));
 }
@@ -69,10 +65,8 @@ static PyObject *Blkid_send_uevent (PyObject *self UNUSED, PyObject *args, PyObj
     char *kwlist[] = { "devname", "action", NULL };
     int ret = 0;
 
-    if (!PyArg_ParseTupleAndKeywords (args, kwargs, "ss", kwlist, &devname, &action)) {
-        PyErr_SetString (PyExc_AttributeError, "Failed to parse arguments");
+    if (!PyArg_ParseTupleAndKeywords (args, kwargs, "ss", kwlist, &devname, &action))
         return NULL;
-    }
 
     ret = blkid_send_uevent (devname, action);
     if (ret < 0) {
@@ -90,10 +84,8 @@ static PyObject *Blkid_known_pttype (PyObject *self UNUSED, PyObject *args, PyOb
     const char *pttype = NULL;
     char *kwlist[] = { "pttype", NULL };
 
-    if (!PyArg_ParseTupleAndKeywords (args, kwargs, "s", kwlist, &pttype)) {
-        PyErr_SetString (PyExc_AttributeError, "Failed to parse arguments");
+    if (!PyArg_ParseTupleAndKeywords (args, kwargs, "s", kwlist, &pttype))
         return NULL;
-    }
 
     return PyBool_FromLong (blkid_known_pttype (pttype));
 }
@@ -124,10 +116,8 @@ static PyObject *Blkid_devno_to_devname (PyObject *self UNUSED, PyObject *args, 
     char *devname = NULL;
     PyObject *ret = NULL;
 
-    if (!PyArg_ParseTupleAndKeywords (args, kwargs, "O&:devno_to_devname", kwlist, _Py_Dev_Converter, &devno)) {
-        PyErr_SetString (PyExc_AttributeError, "Failed to parse arguments");
+    if (!PyArg_ParseTupleAndKeywords (args, kwargs, "O&:devno_to_devname", kwlist, _Py_Dev_Converter, &devno))
         return NULL;
-    }
 
     devname = blkid_devno_to_devname (devno);
     if (!devname) {
