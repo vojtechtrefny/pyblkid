@@ -28,6 +28,20 @@ class BlkidTestCase(unittest.TestCase):
         self.assertTrue(blkid.known_pttype("dos"))
         self.assertFalse(blkid.known_fstype("not-a-partition-table"))
 
+        self.assertEqual(blkid.parse_version_string("2.16.0"), 2160)
+
+        code, version, date = blkid.get_library_version()
+        self.assertGreater(code, 0)
+        self.assertIsNotNone(version)
+        self.assertIsNotNone(date)
+
+        ttype, tvalue = blkid.parse_tag_string("NAME=test")
+        self.assertEqual(ttype, "NAME")
+        self.assertEqual(tvalue, "test")
+
+        size = blkid.get_dev_size(self.loop_dev)
+        self.assertEqual(size, 2097152)  # test.img is 2 MiB
+
     def test_uevent(self):
         with self.assertRaises(RuntimeError):
             blkid.send_uevent("not-a-device", "change")

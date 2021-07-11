@@ -23,6 +23,8 @@
 #include "cache.h"
 
 #include <blkid/blkid.h>
+#include <errno.h>
+#include <fcntl.h>
 
 #define UNUSED __attribute__((unused))
 
@@ -131,12 +133,138 @@ static PyObject *Blkid_devno_to_devname (PyObject *self UNUSED, PyObject *args, 
     return ret;
 }
 
+PyDoc_STRVAR(Blkid_parse_version_string__doc__,
+"parse_version_string (version)\n\n"
+"Convert version string (e.g. '2.16.0') to release version code (e.g. '2160').\n");
+static PyObject *Blkid_parse_version_string (PyObject *self UNUSED, PyObject *args, PyObject *kwargs) {
+    char *ver_str = NULL;
+    char *kwlist[] = { "version", NULL };
+    int ret = 0;
+
+    if (!PyArg_ParseTupleAndKeywords (args, kwargs, "s", kwlist, &ver_str))
+        return NULL;
+
+    ret = blkid_parse_version_string (ver_str);
+
+    return PyLong_FromLong (ret);
+}
+
+PyDoc_STRVAR(Blkid_get_library_version__doc__,
+"get_library_version ()\n\n"
+"Returns tuple of release version code (int), version string and date.\n");
+static PyObject *Blkid_get_library_version (ProbeObject *self UNUSED, PyObject *Py_UNUSED (ignored)) {
+    const char *ver_str = NULL;
+    const char *date = NULL;
+    int ver_code = 0;
+    PyObject *ret = NULL;
+    PyObject *py_code = NULL;
+    PyObject *py_ver = NULL;
+	PyObject *py_date = NULL;
+
+    ver_code = blkid_get_library_version (&ver_str, &date);
+
+    ret = PyTuple_New (3);
+
+    py_code = PyLong_FromLong (ver_code);
+    PyTuple_SetItem (ret, 0, py_code);
+
+    py_ver = PyUnicode_FromString (ver_str);
+    if (py_ver == NULL) {
+        Py_INCREF (Py_None);
+        py_ver = Py_None;
+    }
+    PyTuple_SetItem (ret, 1, py_ver);
+
+    py_date = PyUnicode_FromString (date);
+    if (py_date == NULL) {
+        Py_INCREF (Py_None);
+        py_date = Py_None;
+    }
+    PyTuple_SetItem (ret, 2, py_date);
+
+    return ret;
+}
+
+PyDoc_STRVAR(Blkid_parse_tag_string__doc__,
+"parse_tag_string (tag)\n\n"
+"Parse a 'NAME=value' string, returns tuple of type and value.\n");
+static PyObject *Blkid_parse_tag_string (PyObject *self UNUSED, PyObject *args, PyObject *kwargs) {
+    char *tag_str = NULL;
+    char *kwlist[] = { "tag", NULL };
+    int ret = 0;
+    char *type = NULL;
+    char *value = NULL;
+    PyObject *py_type = NULL;
+	PyObject *py_value = NULL;
+    PyObject *tuple = NULL;
+
+    if (!PyArg_ParseTupleAndKeywords (args, kwargs, "s", kwlist, &tag_str))
+        return NULL;
+
+    ret = blkid_parse_tag_string (tag_str, &type, &value);
+    if (ret < 0) {
+        PyErr_Format (PyExc_RuntimeError, "Failed to parse tag '%s'", tag_str);
+        return NULL;
+    }
+
+    tuple = PyTuple_New (2);
+
+    py_type = PyUnicode_FromString (type);
+    if (py_type == NULL) {
+        Py_INCREF (Py_None);
+        py_type = Py_None;
+    }
+    PyTuple_SetItem (tuple, 0, py_type);
+
+    py_value = PyUnicode_FromString (value);
+    if (py_value == NULL) {
+        Py_INCREF (Py_None);
+        py_value = Py_None;
+    }
+    PyTuple_SetItem (tuple, 1, py_value);
+
+    return tuple;
+}
+
+PyDoc_STRVAR(Blkid_get_dev_size__doc__,
+"get_dev_size (device)\n\n"
+"Returns size (in bytes) of the block device or size of the regular file.\n");
+static PyObject *Blkid_get_dev_size (PyObject *self UNUSED, PyObject *args, PyObject *kwargs) {
+    char *device = NULL;
+    char *kwlist[] = { "device", NULL };
+    blkid_loff_t ret = 0;
+    int fd = 0;
+
+    if (!PyArg_ParseTupleAndKeywords (args, kwargs, "s", kwlist, &device))
+        return NULL;
+
+    fd = open (device, O_RDONLY|O_CLOEXEC);
+    if (fd == -1) {
+        PyErr_Format (PyExc_OSError, "Failed to open device '%s': %s", device, strerror (errno));
+        return NULL;
+    }
+
+    ret = blkid_get_dev_size (fd);
+    if (ret == 0) {
+        PyErr_Format (PyExc_RuntimeError, "Failed to get size of device '%s': %s", device);
+        close (fd);
+        return NULL;
+    }
+
+    close (fd);
+    return PyLong_FromLongLong (ret);
+}
+
 static PyMethodDef BlkidMethods[] = {
     {"init_debug", (PyCFunction)(void(*)(void)) Blkid_init_debug, METH_VARARGS|METH_KEYWORDS, Blkid_init_debug__doc__},
     {"known_fstype", (PyCFunction)(void(*)(void)) Blkid_known_fstype, METH_VARARGS|METH_KEYWORDS, Blkid_known_fstype__doc__},
     {"send_uevent", (PyCFunction)(void(*)(void)) Blkid_send_uevent, METH_VARARGS|METH_KEYWORDS, Blkid_send_uevent__doc__},
     {"devno_to_devname", (PyCFunction)(void(*)(void)) Blkid_devno_to_devname, METH_VARARGS|METH_KEYWORDS, Blkid_devno_to_devname__doc__},
     {"known_pttype", (PyCFunction)(void(*)(void)) Blkid_known_pttype, METH_VARARGS|METH_KEYWORDS, Blkid_known_pttype__doc__},
+    {"parse_version_string", (PyCFunction)(void(*)(void)) Blkid_parse_version_string, METH_VARARGS|METH_KEYWORDS, Blkid_parse_version_string__doc__},
+    {"get_library_version", (PyCFunction) Blkid_get_library_version, METH_NOARGS, Blkid_get_library_version__doc__},
+    {"parse_tag_string", (PyCFunction)(void(*)(void)) Blkid_parse_tag_string, METH_VARARGS|METH_KEYWORDS, Blkid_parse_tag_string__doc__},
+    {"get_dev_size", (PyCFunction)(void(*)(void)) Blkid_get_dev_size, METH_VARARGS|METH_KEYWORDS, Blkid_get_dev_size__doc__},
     {NULL, NULL, 0, NULL}
 };
 
