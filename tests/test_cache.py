@@ -39,5 +39,12 @@ class CacheTestCase(unittest.TestCase):
         self.assertIsNotNone(device)
         self.assertEqual(device.devname, self.loop_dev)
 
+        device = cache.find_device("LABEL", "not-in-cache")
+        self.assertIsNone(device)
+
+        device = cache.find_device("LABEL", "test-ext3")
+        self.assertIsNotNone(device)
+        self.assertEqual(device.devname, self.loop_dev)
+
 if __name__ == "__main__":
     unittest.main()

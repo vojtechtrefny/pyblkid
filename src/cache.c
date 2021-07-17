@@ -123,10 +123,42 @@ static PyObject *Cache_get_device (CacheObject *self, PyObject *args, PyObject *
     return (PyObject *)  dev_obj;
 }
 
+PyDoc_STRVAR(Cache_find_device__doc__,
+"find_device (tag, value)\n\n"
+"Returns a device which matches a particular tag/value pair.\n"
+" If there is more than one device that matches the search specification, "
+"it returns the one with the highest priority\n\n");
+static PyObject *Cache_find_device (CacheObject *self, PyObject *args, PyObject *kwargs) {
+    const char *tag = NULL;
+    const char *value = NULL;
+    char *kwlist[] = { "tag", "value", NULL };
+    blkid_dev device = NULL;
+    DeviceObject *dev_obj = NULL;
+
+    if (!PyArg_ParseTupleAndKeywords (args, kwargs, "ss", kwlist, &tag, &value))
+        return NULL;
+
+    device = blkid_find_dev_with_tag (self->cache, tag, value);
+    if (device == NULL)
+        Py_RETURN_NONE;
+
+    dev_obj = PyObject_New (DeviceObject, &DeviceType);
+    if (!dev_obj) {
+        PyErr_SetString (PyExc_MemoryError, "Failed to create a new Device object");
+        return NULL;
+    }
+
+    dev_obj->device = device;
+
+    Py_INCREF (dev_obj);
+    return (PyObject *)  dev_obj;
+}
+
 static PyMethodDef Cache_methods[] = {
     {"probe_all", (PyCFunction)(void(*)(void)) Cache_probe_all, METH_VARARGS|METH_KEYWORDS, Cache_probe_all__doc__},
     {"gc", (PyCFunction) Cache_gc, METH_NOARGS, Cache_gc__doc__},
     {"get_device", (PyCFunction)(void(*)(void)) Cache_get_device, METH_VARARGS|METH_KEYWORDS, Cache_get_device__doc__},
+    {"find_device", (PyCFunction)(void(*)(void)) Cache_find_device, METH_VARARGS|METH_KEYWORDS, Cache_find_device__doc__},
     {NULL, NULL, 0, NULL},
 };
 
