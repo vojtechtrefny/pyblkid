@@ -36,6 +36,7 @@ void Cache_dealloc (CacheObject *self);
 typedef struct {
     PyObject_HEAD
     blkid_dev device;
+    blkid_cache cache;
 } DeviceObject;
 
 extern PyTypeObject DeviceType;

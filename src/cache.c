@@ -118,6 +118,7 @@ static PyObject *Cache_get_device (CacheObject *self, PyObject *args, PyObject *
     }
 
     dev_obj->device = device;
+    dev_obj->cache = self->cache;
 
     Py_INCREF (dev_obj);
     return (PyObject *)  dev_obj;
@@ -149,6 +150,7 @@ static PyObject *Cache_find_device (CacheObject *self, PyObject *args, PyObject 
     }
 
     dev_obj->device = device;
+    dev_obj->cache = self->cache;
 
     Py_INCREF (dev_obj);
     return (PyObject *)  dev_obj;
@@ -182,6 +184,7 @@ static PyObject *Cache_get_devices (CacheObject *self, PyObject *Py_UNUSED (igno
             return NULL;
         }
         dev_obj->device = device;
+        dev_obj->cache = self->cache;
         PyList_Append (list, (PyObject *) dev_obj);
 
 	}
@@ -212,8 +215,10 @@ PyTypeObject CacheType = {
 PyObject *Device_new (PyTypeObject *type,  PyObject *args UNUSED, PyObject *kwargs UNUSED) {
     DeviceObject *self = (DeviceObject*) type->tp_alloc (type, 0);
 
-    if (self)
+    if (self) {
         self->device = NULL;
+        self->cache = NULL;
+    }
 
     return (PyObject *) self;
 }
@@ -225,6 +230,22 @@ int Device_init (DeviceObject *self UNUSED, PyObject *args UNUSED, PyObject *kwa
 void Device_dealloc (DeviceObject *self) {
     Py_TYPE (self)->tp_free ((PyObject *) self);
 }
+
+PyDoc_STRVAR(Device_verify__doc__,
+"verify\n\n"
+"Verify that the data in device is consistent with what is on the actual"
+"block device.  Normally this will be called when finding items in the cache, "
+"but for long running processes is also desirable to revalidate an item before use.");
+static PyObject *Device_verify (DeviceObject *self, PyObject *Py_UNUSED (ignored))  {
+    self->device = blkid_verify (self->cache, self->device);
+
+    Py_RETURN_NONE;
+}
+
+static PyMethodDef Device_methods[] = {
+    {"verify", (PyCFunction) Device_verify, METH_NOARGS, Device_verify__doc__},
+    {NULL, NULL, 0, NULL},
+};
 
 static PyObject *Device_get_devname (DeviceObject *self, PyObject *Py_UNUSED (ignored)) {
     const char *name = blkid_dev_devname (self->device);
@@ -278,5 +299,6 @@ PyTypeObject DeviceType = {
     .tp_new = Device_new,
     .tp_dealloc = (destructor) Device_dealloc,
     .tp_init = (initproc) Device_init,
+    .tp_methods = Device_methods,
     .tp_getset = Device_getseters,
 };

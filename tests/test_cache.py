@@ -57,5 +57,9 @@ class CacheTestCase(unittest.TestCase):
         self.assertTrue(cache.devices)
         self.assertIn(self.loop_dev, [d.devname for d in cache.devices])
 
+        device.verify()
+        self.assertIsNotNone(device)
+        self.assertEqual(device.devname, self.loop_dev)
+
 if __name__ == "__main__":
     unittest.main()
