@@ -54,5 +54,8 @@ class CacheTestCase(unittest.TestCase):
         self.assertIn("TYPE", device.tags.keys())
         self.assertEqual(device.tags["TYPE"], "ext3")
 
+        self.assertTrue(cache.devices)
+        self.assertIn(self.loop_dev, [d.devname for d in cache.devices])
+
 if __name__ == "__main__":
     unittest.main()

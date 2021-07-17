@@ -162,6 +162,39 @@ static PyMethodDef Cache_methods[] = {
     {NULL, NULL, 0, NULL},
 };
 
+static PyObject *Cache_get_devices (CacheObject *self, PyObject *Py_UNUSED (ignored)) {
+    blkid_dev_iterate iter;
+    blkid_dev device = NULL;
+    DeviceObject *dev_obj = NULL;
+    PyObject *list = NULL;
+
+    list = PyList_New (0);
+    if (!list) {
+        PyErr_NoMemory ();
+        return NULL;
+    }
+
+    iter = blkid_dev_iterate_begin (self->cache);
+    while (blkid_dev_next (iter, &device) == 0) {
+        dev_obj = PyObject_New (DeviceObject, &DeviceType);
+        if (!dev_obj) {
+            PyErr_NoMemory ();
+            return NULL;
+        }
+        dev_obj->device = device;
+        PyList_Append (list, (PyObject *) dev_obj);
+
+	}
+	blkid_dev_iterate_end(iter);
+
+    return (PyObject *) list;
+}
+
+static PyGetSetDef Cache_getseters[] = {
+    {"devices", (getter) Cache_get_devices, NULL, "returns all devices in the cache", NULL},
+    {NULL, NULL, NULL, NULL, NULL}
+};
+
 PyTypeObject CacheType = {
     PyVarObject_HEAD_INIT (NULL, 0)
     .tp_name = "blkid.Cache",
@@ -172,6 +205,7 @@ PyTypeObject CacheType = {
     .tp_dealloc = (destructor) Cache_dealloc,
     .tp_init = (initproc) Cache_init,
     .tp_methods = Cache_methods,
+    .tp_getset = Cache_getseters,
 };
 
 /*********************** DEVICE ***********************/
