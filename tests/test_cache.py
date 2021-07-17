@@ -46,5 +46,13 @@ class CacheTestCase(unittest.TestCase):
         self.assertIsNotNone(device)
         self.assertEqual(device.devname, self.loop_dev)
 
+        self.assertIsNotNone(device.tags)
+        self.assertIn("UUID", device.tags.keys())
+        self.assertEqual(device.tags["UUID"], "35f66dab-477e-4090-a872-95ee0e493ad6")
+        self.assertIn("LABEL", device.tags.keys())
+        self.assertEqual(device.tags["LABEL"], "test-ext3")
+        self.assertIn("TYPE", device.tags.keys())
+        self.assertEqual(device.tags["TYPE"], "ext3")
+
 if __name__ == "__main__":
     unittest.main()

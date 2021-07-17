@@ -201,8 +201,37 @@ static PyObject *Device_get_devname (DeviceObject *self, PyObject *Py_UNUSED (ig
     return PyUnicode_FromString (name);
 }
 
+static PyObject *Device_get_tags (DeviceObject *self, PyObject *Py_UNUSED (ignored)) {
+    blkid_tag_iterate iter;
+	const char *type = NULL;
+    const char *value = NULL;
+    PyObject *dict = NULL;
+    PyObject *py_value = NULL;
+
+    dict = PyDict_New ();
+    if (!dict) {
+        PyErr_NoMemory ();
+        return NULL;
+    }
+
+    iter = blkid_tag_iterate_begin (self->device);
+    while (blkid_tag_next (iter, &type, &value) == 0) {
+        py_value = PyUnicode_FromString (value);
+        if (py_value == NULL) {
+            Py_INCREF (Py_None);
+            py_value = Py_None;
+        }
+
+        PyDict_SetItemString (dict, type, py_value);
+    }
+    blkid_tag_iterate_end(iter);
+
+    return (PyObject *) dict;
+}
+
 static PyGetSetDef Device_getseters[] = {
     {"devname", (getter) Device_get_devname, NULL, "returns the name previously used for Cache.get_device.", NULL},
+    {"tags", (getter) Device_get_tags, NULL, "returns all tags for this device.", NULL},
     {NULL, NULL, NULL, NULL, NULL}
 };
 
