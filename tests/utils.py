@@ -27,7 +27,7 @@ def loop_setup(filename):
             raise RuntimeError("Failed to decompress file %s: %s" % (filename, out))
     filename = filename[:-3]
 
-    ret, out = run_command("losetup --show -f %s" % filename)
+    ret, out = run_command("losetup --show --partscan -f %s" % filename)
     if ret != 0:
         raise RuntimeError("Failed to create loop device from %s: %s" % (filename, out))
     return out

@@ -122,3 +122,13 @@ class PartitionsTestCase(unittest.TestCase):
         # no nested partition table here, just the gpt
         table = part.table
         self.assertEqual(table.type, "gpt")
+
+        # devno_to_part
+        disk_name = os.path.basename(self.loop_dev)
+        sysfs_path = "/sys/block/%s/%s/dev" % (disk_name, disk_name + "p" + str(part.partno))
+        major_minor = utils.read_file(sysfs_path).strip()
+        major, minor = major_minor.split(":")
+        devno = os.makedev(int(major), int(minor))
+
+        part = pr.partitions.devno_to_partition(devno)
+        self.assertEqual(part.uuid, "1dcf10bc-637e-4c52-8203-087ae10a820b")

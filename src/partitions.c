@@ -119,8 +119,58 @@ static PyObject *Partlist_get_partition (PartlistObject *self, PyObject *args, P
     return (PyObject *) result;
 }
 
+static int _Py_Dev_Converter (PyObject *obj, void *p) {
+#ifdef HAVE_LONG_LONG
+    *((dev_t *)p) = PyLong_AsUnsignedLongLong (obj);
+#else
+    *((dev_t *)p) = PyLong_AsUnsignedLong (obj);
+#endif
+    if (PyErr_Occurred ())
+        return 0;
+    return 1;
+}
+
+#ifdef HAVE_LONG_LONG
+    #define _PyLong_FromDev PyLong_FromLongLong
+#else
+    #define _PyLong_FromDev PyLong_FromLong
+#endif
+
+PyDoc_STRVAR(Partlist_devno_to_partition__doc__,
+"devno_to_partition (devno)\n\n"
+"Get partition by devno.\n");
+static PyObject *Partlist_devno_to_partition (PartlistObject *self, PyObject *args, PyObject *kwargs) {
+    dev_t devno = 0;
+    char *kwlist[] = { "devno", NULL };
+    blkid_partition blkid_part = NULL;
+    PartitionObject *result = NULL;
+
+    if (!PyArg_ParseTupleAndKeywords (args, kwargs, "O&:devno_to_devname", kwlist, _Py_Dev_Converter, &devno))
+        return NULL;
+
+    blkid_part = blkid_partlist_devno_to_partition (self->partlist, devno);
+    if (!blkid_part) {
+        PyErr_Format (PyExc_RuntimeError, "Failed to get partition %zu", devno);
+        return NULL;
+    }
+
+    result = PyObject_New (PartitionObject, &PartitionType);
+    if (!result) {
+        PyErr_NoMemory ();
+        return NULL;
+    }
+
+    Py_INCREF (result);
+    result->number = blkid_partition_get_partno (blkid_part);
+    result->partition = blkid_part;
+    result->Parttable_object = NULL;
+
+    return (PyObject *) result;
+}
+
 static PyMethodDef Partlist_methods[] = {
     {"get_partition", (PyCFunction)(void(*)(void)) Partlist_get_partition, METH_VARARGS|METH_KEYWORDS, Partlist_get_partition__doc__},
+    {"devno_to_partition", (PyCFunction)(void(*)(void)) Partlist_devno_to_partition, METH_VARARGS|METH_KEYWORDS, Partlist_devno_to_partition__doc__},
     {NULL, NULL, 0, NULL},
 };
 
