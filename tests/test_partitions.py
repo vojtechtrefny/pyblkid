@@ -119,6 +119,9 @@ class PartitionsTestCase(unittest.TestCase):
         self.assertEqual(part.start, 34)
         self.assertEqual(part.size, 2014)
 
+        part = pr.partitions.get_partition_by_partno(1)
+        self.assertEqual(part.uuid, "1dcf10bc-637e-4c52-8203-087ae10a820b")
+
         # no nested partition table here, just the gpt
         table = part.table
         self.assertEqual(table.type, "gpt")

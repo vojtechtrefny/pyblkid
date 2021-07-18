@@ -119,6 +119,41 @@ static PyObject *Partlist_get_partition (PartlistObject *self, PyObject *args, P
     return (PyObject *) result;
 }
 
+PyDoc_STRVAR(Partlist_get_partition_by_partno__doc__,
+"get_partition_by_partno(number)\n\n"
+"Get partition by partition number.\n\n"
+"This does not assume any order of partitions and correctly handles \"out of order\" "
+"partition tables. partition N is located after partition N+1 on the disk.");
+static PyObject *Partlist_get_partition_by_partno (PartlistObject *self, PyObject *args, PyObject *kwargs) {
+    char *kwlist[] = { "number", NULL };
+    int partno = 0;
+    blkid_partition blkid_part = NULL;
+    PartitionObject *result = NULL;
+
+    if (!PyArg_ParseTupleAndKeywords (args, kwargs, "i", kwlist, &partno)) {
+        return NULL;
+    }
+
+    blkid_part = blkid_partlist_get_partition_by_partno (self->partlist, partno);
+    if (!blkid_part) {
+        PyErr_Format (PyExc_RuntimeError, "Failed to get partition %d", partno);
+        return NULL;
+    }
+
+    result = PyObject_New (PartitionObject, &PartitionType);
+    if (!result) {
+        PyErr_NoMemory ();
+        return NULL;
+    }
+
+    Py_INCREF (result);
+    result->number = partno;
+    result->partition = blkid_part;
+    result->Parttable_object = NULL;
+
+    return (PyObject *) result;
+}
+
 static int _Py_Dev_Converter (PyObject *obj, void *p) {
 #ifdef HAVE_LONG_LONG
     *((dev_t *)p) = PyLong_AsUnsignedLongLong (obj);
@@ -170,6 +205,7 @@ static PyObject *Partlist_devno_to_partition (PartlistObject *self, PyObject *ar
 
 static PyMethodDef Partlist_methods[] = {
     {"get_partition", (PyCFunction)(void(*)(void)) Partlist_get_partition, METH_VARARGS|METH_KEYWORDS, Partlist_get_partition__doc__},
+    {"get_partition_by_partno", (PyCFunction)(void(*)(void)) Partlist_get_partition_by_partno, METH_VARARGS|METH_KEYWORDS, Partlist_get_partition_by_partno__doc__},
     {"devno_to_partition", (PyCFunction)(void(*)(void)) Partlist_devno_to_partition, METH_VARARGS|METH_KEYWORDS, Partlist_devno_to_partition__doc__},
     {NULL, NULL, 0, NULL},
 };
