@@ -178,6 +178,10 @@ static PyObject *Probe_filter_superblocks_type (ProbeObject *self, PyObject *arg
     }
 
     names = malloc(sizeof (char *) * (len + 1));
+    if (!names) {
+        PyErr_NoMemory ();
+        return NULL;
+    }
 
     for (Py_ssize_t i = 0; i < len; i++) {
         pystring = PyUnicode_AsEncodedString (PySequence_GetItem (pynames, i), "utf-8", "replace");
@@ -331,6 +335,10 @@ static PyObject *Probe_filter_partitions_type (ProbeObject *self, PyObject *args
     }
 
     names = malloc(sizeof (char *) * (len + 1));
+    if (!names) {
+        PyErr_NoMemory ();
+        return NULL;
+    }
 
     for (Py_ssize_t i = 0; i < len; i++) {
         pystring = PyUnicode_AsEncodedString (PySequence_GetItem (pynames, i), "utf-8", "replace");
