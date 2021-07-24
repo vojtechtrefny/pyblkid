@@ -120,7 +120,6 @@ static PyObject *Cache_get_device (CacheObject *self, PyObject *args, PyObject *
     dev_obj->device = device;
     dev_obj->cache = self->cache;
 
-    Py_INCREF (dev_obj);
     return (PyObject *)  dev_obj;
 }
 
@@ -152,7 +151,6 @@ static PyObject *Cache_find_device (CacheObject *self, PyObject *args, PyObject 
     dev_obj->device = device;
     dev_obj->cache = self->cache;
 
-    Py_INCREF (dev_obj);
     return (PyObject *)  dev_obj;
 }
 
@@ -186,6 +184,7 @@ static PyObject *Cache_get_devices (CacheObject *self, PyObject *Py_UNUSED (igno
         dev_obj->device = device;
         dev_obj->cache = self->cache;
         PyList_Append (list, (PyObject *) dev_obj);
+        Py_DECREF (dev_obj);
 
 	}
 	blkid_dev_iterate_end(iter);

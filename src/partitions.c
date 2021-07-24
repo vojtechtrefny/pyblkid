@@ -111,7 +111,6 @@ static PyObject *Partlist_get_partition (PartlistObject *self, PyObject *args, P
         return NULL;
     }
 
-    Py_INCREF (result);
     result->number = partnum;
     result->partition = blkid_part;
     result->Parttable_object = NULL;
@@ -146,7 +145,6 @@ static PyObject *Partlist_get_partition_by_partno (PartlistObject *self, PyObjec
         return NULL;
     }
 
-    Py_INCREF (result);
     result->number = partno;
     result->partition = blkid_part;
     result->Parttable_object = NULL;
@@ -195,7 +193,6 @@ static PyObject *Partlist_devno_to_partition (PartlistObject *self, PyObject *ar
         return NULL;
     }
 
-    Py_INCREF (result);
     result->number = blkid_partition_get_partno (blkid_part);
     result->partition = blkid_part;
     result->Parttable_object = NULL;
@@ -313,7 +310,6 @@ static PyObject *Parttable_get_parent (ParttableObject *self, PyObject *Py_UNUSE
         return NULL;
     }
 
-    Py_INCREF (result);
     result->number = 0;
     result->partition = blkid_part;
 

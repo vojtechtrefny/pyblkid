@@ -215,6 +215,7 @@ static PyObject *Blkid_parse_tag_string (PyObject *self UNUSED, PyObject *args, 
         py_type = Py_None;
     }
     PyTuple_SetItem (tuple, 0, py_type);
+    free (type);
 
     py_value = PyUnicode_FromString (value);
     if (py_value == NULL) {
@@ -222,6 +223,7 @@ static PyObject *Blkid_parse_tag_string (PyObject *self UNUSED, PyObject *args, 
         py_value = Py_None;
     }
     PyTuple_SetItem (tuple, 1, py_value);
+    free (value);
 
     return tuple;
 }
