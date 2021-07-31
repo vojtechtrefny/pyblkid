@@ -16,6 +16,7 @@ jobs:
     - name: Install dependencies
       run:   |
          sudo apt-get -qq update
+         sudo apt-get -y -qq install python3-pkgconfig
          sudo apt-get -y -qq install libblkid-dev libblkid1 python3-dev
     - name: Run tests
       run: sudo make test

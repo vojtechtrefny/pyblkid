@@ -94,12 +94,26 @@ static PyObject *Topology_get_physical_sector_size (TopologyObject *self, PyObje
     return PyLong_FromUnsignedLong (physical_sector_size);
 }
 
+#ifdef HAVE_BLKID2360
+static PyObject *Topology_get_dax (TopologyObject *self, PyObject *Py_UNUSED (ignored)) {
+    int dax = blkid_topology_get_dax (self->topology);
+
+    if (dax == 1)
+        Py_RETURN_TRUE;
+    else
+        Py_RETURN_FALSE;
+}
+#endif
+
 static PyGetSetDef Topology_getseters[] = {
     {"alignment_offset", (getter) Topology_get_alignment_offset, NULL, "alignment offset in bytes or 0", NULL},
     {"logical_sector_size", (getter) Topology_get_logical_sector_size, NULL, "logical sector size (BLKSSZGET ioctl) in bytes or 0", NULL},
     {"minimum_io_size", (getter) Topology_get_minimum_io_size, NULL, "minimum io size in bytes or 0", NULL},
     {"optimal_io_size", (getter) Topology_get_optimal_io_size, NULL, "optimal io size in bytes or 0", NULL},
     {"physical_sector_size", (getter) Topology_get_physical_sector_size, NULL, "logical sector size (BLKSSZGET ioctl) in bytes or 0", NULL},
+#ifdef HAVE_BLKID2360
+    {"dax", (getter) Topology_get_dax, NULL, "whether DAX is supported or not", NULL},
+#endif
     {NULL, NULL, NULL, NULL, NULL}
 };
 

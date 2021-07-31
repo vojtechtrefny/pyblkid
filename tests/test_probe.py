@@ -203,5 +203,13 @@ class ProbeTestCase(unittest.TestCase):
         self.assertEqual(pr.topology.optimal_io_size, 0)
         self.assertEqual(pr.topology.physical_sector_size, 512)
 
+        code, _version, _date = blkid.get_library_version()
+        if code >= 2360:
+            self.assertFalse(pr.topology.dax)
+        else:
+            with self.assertRaises(AttributeError):
+                self.assertIsNone(pr.topology.dax)
+
+
 if __name__ == "__main__":
     unittest.main()

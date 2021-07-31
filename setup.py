@@ -13,7 +13,16 @@
 # You should have received a copy of the GNU Lesser General Public
 # License along with this library; if not, see <http://www.gnu.org/licenses/>.
 
+import pkgconfig
+
 from distutils.core import setup, Extension
+
+
+macros = []
+
+if pkgconfig.installed("blkid", ">= 2.36"):
+    macros.append(("HAVE_BLKID2360", "1"))
+
 
 def main():
     setup(name="pyblkid",
@@ -30,6 +39,7 @@ def main():
                                  include_dirs = ["/usr/include"],
                                  libraries = ["blkid"],
                                  library_dirs = ["/usr/lib"],
+                                 define_macros=macros,
                                  extra_compile_args = ["-Wall", "-Wextra", "-Werror"])])
 
 if __name__ == "__main__":
