@@ -56,3 +56,16 @@ class BlkidTestCase(unittest.TestCase):
 
         devpath = blkid.devno_to_devname(devno)
         self.assertEqual(devpath, self.loop_dev)
+
+    def test_safe_encode_string(self):
+        string = "aaaaaa"
+        safe_string = blkid.safe_string(string)
+        encoded_string = blkid.encode_string(string)
+        self.assertEqual(string, safe_string)
+        self.assertEqual(string, encoded_string)
+
+        string = "aa aaa"
+        safe_string = blkid.safe_string(string)
+        encoded_string = blkid.encode_string(string)
+        self.assertEqual(safe_string, "aa_aaa")
+        self.assertEqual(encoded_string, "aa\\x20aaa")

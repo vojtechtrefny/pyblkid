@@ -257,6 +257,70 @@ static PyObject *Blkid_get_dev_size (PyObject *self UNUSED, PyObject *args, PyOb
     return PyLong_FromLongLong (ret);
 }
 
+PyDoc_STRVAR(Blkid_encode_string__doc__,
+"encode_string (string)\n\n"
+"Encode all potentially unsafe characters of a string to the corresponding hex value prefixed by '\\x'.\n");
+static PyObject *Blkid_encode_string (PyObject *self UNUSED, PyObject *args, PyObject *kwargs) {
+    char *string = NULL;
+    char *kwlist[] = { "string", NULL };
+    char *encoded_string = NULL;
+    int ret = 0;
+    size_t inlen = 0;
+    size_t outlen = 0;
+    PyObject *py_ret = NULL;
+
+    if (!PyArg_ParseTupleAndKeywords (args, kwargs, "s", kwlist, &string))
+        return NULL;
+
+    inlen = strlen (string);
+    outlen = inlen * 4;
+    encoded_string = malloc (sizeof (char) * (outlen + 1 ));
+
+    ret = blkid_encode_string (string, encoded_string, outlen);
+    if (ret != 0) {
+        PyErr_Format (PyExc_RuntimeError, "Failed to encode string");
+        free (encoded_string);
+        return NULL;
+    }
+
+    py_ret = PyUnicode_FromString (encoded_string);
+    free (encoded_string);
+
+    return py_ret;
+}
+
+PyDoc_STRVAR(Blkid_safe_string__doc__,
+"safe_string (string)\n\n"
+"Allows plain ascii, hex-escaping and valid utf8. Replaces all whitespaces with '_'.\n");
+static PyObject *Blkid_safe_string (PyObject *self UNUSED, PyObject *args, PyObject *kwargs) {
+    char *string = NULL;
+    char *kwlist[] = { "string", NULL };
+    char *safe_string = NULL;
+    int ret = 0;
+    size_t inlen = 0;
+    size_t outlen = 0;
+    PyObject *py_ret = NULL;
+
+    if (!PyArg_ParseTupleAndKeywords (args, kwargs, "s", kwlist, &string))
+        return NULL;
+
+    inlen = strlen (string);
+    outlen = inlen * 4;
+    safe_string = malloc (sizeof (char) * (outlen + 1 ));
+
+    ret = blkid_safe_string (string, safe_string, outlen);
+    if (ret != 0) {
+        PyErr_Format (PyExc_RuntimeError, "Failed to make safe string");
+        free (safe_string);
+        return NULL;
+    }
+
+    py_ret = PyUnicode_FromString (safe_string);
+    free (safe_string);
+
+    return py_ret;
+}
+
 static PyMethodDef BlkidMethods[] = {
     {"init_debug", (PyCFunction)(void(*)(void)) Blkid_init_debug, METH_VARARGS|METH_KEYWORDS, Blkid_init_debug__doc__},
     {"known_fstype", (PyCFunction)(void(*)(void)) Blkid_known_fstype, METH_VARARGS|METH_KEYWORDS, Blkid_known_fstype__doc__},
@@ -267,6 +331,8 @@ static PyMethodDef BlkidMethods[] = {
     {"get_library_version", (PyCFunction) Blkid_get_library_version, METH_NOARGS, Blkid_get_library_version__doc__},
     {"parse_tag_string", (PyCFunction)(void(*)(void)) Blkid_parse_tag_string, METH_VARARGS|METH_KEYWORDS, Blkid_parse_tag_string__doc__},
     {"get_dev_size", (PyCFunction)(void(*)(void)) Blkid_get_dev_size, METH_VARARGS|METH_KEYWORDS, Blkid_get_dev_size__doc__},
+    {"encode_string", (PyCFunction)(void(*)(void)) Blkid_encode_string, METH_VARARGS|METH_KEYWORDS, Blkid_encode_string__doc__},
+    {"safe_string", (PyCFunction)(void(*)(void)) Blkid_safe_string, METH_VARARGS|METH_KEYWORDS, Blkid_safe_string__doc__},
     {NULL, NULL, 0, NULL}
 };
 
