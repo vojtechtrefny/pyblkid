@@ -248,7 +248,7 @@ static PyObject *Blkid_get_dev_size (PyObject *self UNUSED, PyObject *args, PyOb
 
     ret = blkid_get_dev_size (fd);
     if (ret == 0) {
-        PyErr_Format (PyExc_RuntimeError, "Failed to get size of device '%s': %s", device);
+        PyErr_Format (PyExc_RuntimeError, "Failed to get size of device '%s'", device);
         close (fd);
         return NULL;
     }
