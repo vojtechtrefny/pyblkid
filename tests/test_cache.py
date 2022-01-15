@@ -61,5 +61,8 @@ class CacheTestCase(unittest.TestCase):
         self.assertIsNotNone(device)
         self.assertEqual(device.devname, self.loop_dev)
 
+        # we don't have new devices, so just a sanity check
+        cache.probe_all(new_only=True)
+
 if __name__ == "__main__":
     unittest.main()

@@ -56,30 +56,40 @@ void Cache_dealloc (CacheObject *self) {
 }
 
 PyDoc_STRVAR(Cache_probe_all__doc__,
-"probe_all (removable=False)\n\n"
+"probe_all (removable=False, new_only=False)\n\n"
 "Probes all block devices.\n\n"
 "With removable=True also adds removable block devices to cache. Don't forget that "
-"removable devices could be pretty slow. It's very bad idea to call this function by default.");
+"removable devices could be pretty slow. It's very bad idea to call this function by default."
+"With new_only=True this will scan only newly connected devices.");
 static PyObject *Cache_probe_all (CacheObject *self, PyObject *args, PyObject *kwargs) {
     bool removable = false;
-    char *kwlist[] = { "removable", NULL };
+    bool new = false;
+    char *kwlist[] = { "removable", "new_only", NULL };
     int ret = 0;
 
-    if (!PyArg_ParseTupleAndKeywords (args, kwargs, "|p", kwlist, &removable)) {
+    if (!PyArg_ParseTupleAndKeywords (args, kwargs, "|pp", kwlist, &removable, &new)) {
         return NULL;
     }
 
-    ret = blkid_probe_all (self->cache);
-    if (ret < 0) {
-        PyErr_SetString (PyExc_RuntimeError, "Failed to probe block devices");
-        return NULL;
-    }
-
-    if (removable) {
-        ret = blkid_probe_all_removable (self->cache);
+    if (new) {
+        ret = blkid_probe_all_new (self->cache);
         if (ret < 0) {
-        PyErr_SetString (PyExc_RuntimeError, "Failed to probe removable devices");
-        return NULL;
+            PyErr_SetString (PyExc_RuntimeError, "Failed to probe new devices");
+            return NULL;
+        }
+    } else {
+        ret = blkid_probe_all (self->cache);
+        if (ret < 0) {
+            PyErr_SetString (PyExc_RuntimeError, "Failed to probe block devices");
+            return NULL;
+        }
+
+        if (removable) {
+            ret = blkid_probe_all_removable (self->cache);
+            if (ret < 0) {
+                PyErr_SetString (PyExc_RuntimeError, "Failed to probe removable devices");
+                return NULL;
+            }
         }
     }
 
