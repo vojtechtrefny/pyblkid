@@ -42,6 +42,14 @@ class BlkidTestCase(unittest.TestCase):
         size = blkid.get_dev_size(self.loop_dev)
         self.assertEqual(size, 2097152)  # test.img is 2 MiB
 
+        # dos should be always supported so we can use it here to test
+        types = blkid.partition_types()
+        self.assertIn("dos", types)
+
+        # ext4 should be always supported so we can use it here to test
+        supers = blkid.superblocks()
+        self.assertIn("ext4", supers)
+
     def test_uevent(self):
         with self.assertRaises(RuntimeError):
             blkid.send_uevent("not-a-device", "change")

@@ -321,6 +321,46 @@ static PyObject *Blkid_safe_string (PyObject *self UNUSED, PyObject *args, PyObj
     return py_ret;
 }
 
+PyDoc_STRVAR(Blkid_partition_types__doc__,
+"partition_types ()\n\n"
+"List of supported partition types.\n");
+static PyObject *Blkid_partition_types (ProbeObject *self UNUSED, PyObject *Py_UNUSED (ignored)) {
+    PyObject *ret = NULL;
+    PyObject *py_name = NULL;
+    size_t idx = 0;
+    const char *name = NULL;
+
+    ret = PyList_New (0);
+
+    while (blkid_partitions_get_name (idx++, &name) == 0) {
+        py_name = PyUnicode_FromString (name);
+        if (py_name != NULL)
+            PyList_Append (ret, py_name);
+    }
+
+    return ret;
+}
+
+PyDoc_STRVAR(Blkid_superblocks__doc__,
+"superblocks ()\n\n"
+"List of supported superblocks.\n");
+static PyObject *Blkid_superblocks (ProbeObject *self UNUSED, PyObject *Py_UNUSED (ignored)) {
+    PyObject *ret = NULL;
+    PyObject *py_name = NULL;
+    size_t idx = 0;
+    const char *name = NULL;
+
+    ret = PyList_New (0);
+
+    while (blkid_superblocks_get_name (idx++, &name, NULL) == 0) {
+        py_name = PyUnicode_FromString (name);
+        if (py_name != NULL)
+            PyList_Append (ret, py_name);
+    }
+
+    return ret;
+}
+
 static PyMethodDef BlkidMethods[] = {
     {"init_debug", (PyCFunction)(void(*)(void)) Blkid_init_debug, METH_VARARGS|METH_KEYWORDS, Blkid_init_debug__doc__},
     {"known_fstype", (PyCFunction)(void(*)(void)) Blkid_known_fstype, METH_VARARGS|METH_KEYWORDS, Blkid_known_fstype__doc__},
@@ -333,6 +373,8 @@ static PyMethodDef BlkidMethods[] = {
     {"get_dev_size", (PyCFunction)(void(*)(void)) Blkid_get_dev_size, METH_VARARGS|METH_KEYWORDS, Blkid_get_dev_size__doc__},
     {"encode_string", (PyCFunction)(void(*)(void)) Blkid_encode_string, METH_VARARGS|METH_KEYWORDS, Blkid_encode_string__doc__},
     {"safe_string", (PyCFunction)(void(*)(void)) Blkid_safe_string, METH_VARARGS|METH_KEYWORDS, Blkid_safe_string__doc__},
+    {"partition_types", (PyCFunction) Blkid_partition_types, METH_NOARGS, Blkid_partition_types__doc__},
+    {"superblocks", (PyCFunction) Blkid_superblocks, METH_NOARGS, Blkid_superblocks__doc__},
     {NULL, NULL, 0, NULL}
 };
 
