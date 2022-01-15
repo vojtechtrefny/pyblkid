@@ -361,6 +361,59 @@ static PyObject *Blkid_superblocks (ProbeObject *self UNUSED, PyObject *Py_UNUSE
     return ret;
 }
 
+PyDoc_STRVAR(Blkid_evaluate_tag__doc__,
+"evaluate_tag (token, value)\n\n"
+"Get device name that match the specified token (e.g \"LABEL\" or \"UUID\") and token value.\n"
+"The evaluation could be controlled by the /etc/blkid.conf config file. The default is to try \"udev\" and then \"scan\" method.\n");
+static PyObject *Blkid_evaluate_tag (PyObject *self UNUSED, PyObject *args, PyObject *kwargs) {
+    char *token = NULL;
+    char *value = NULL;
+    char *kwlist[] = { "token", "value", NULL };
+    PyObject *py_ret = NULL;
+    char *ret = NULL;
+
+    if (!PyArg_ParseTupleAndKeywords (args, kwargs, "ss", kwlist, &token, &value))
+        return NULL;
+
+
+    ret = blkid_evaluate_tag (token, value, NULL);
+    if (ret == NULL) {
+        Py_INCREF (Py_None);
+        py_ret = Py_None;
+    } else {
+        py_ret = PyUnicode_FromString (ret);
+        free (ret);
+    }
+
+    return py_ret;
+}
+
+PyDoc_STRVAR(Blkid_evaluate_spec__doc__,
+"evaluate_spec (spec)\n\n"
+"Get device name that match the unparsed tag (e.g. \"LABEL=foo\") or path (e.g. /dev/dm-0)\n"
+"The evaluation could be controlled by the /etc/blkid.conf config file. The default is to try \"udev\" and then \"scan\" method.\n");
+static PyObject *Blkid_evaluate_spec (PyObject *self UNUSED, PyObject *args, PyObject *kwargs) {
+    char *spec = NULL;
+    char *kwlist[] = { "spec", NULL };
+    PyObject *py_ret = NULL;
+    char *ret = NULL;
+
+    if (!PyArg_ParseTupleAndKeywords (args, kwargs, "s", kwlist, &spec))
+        return NULL;
+
+
+    ret = blkid_evaluate_spec (spec, NULL);
+    if (ret == NULL) {
+        Py_INCREF (Py_None);
+        py_ret = Py_None;
+    } else {
+        py_ret = PyUnicode_FromString (ret);
+        free (ret);
+    }
+
+    return py_ret;
+}
+
 static PyMethodDef BlkidMethods[] = {
     {"init_debug", (PyCFunction)(void(*)(void)) Blkid_init_debug, METH_VARARGS|METH_KEYWORDS, Blkid_init_debug__doc__},
     {"known_fstype", (PyCFunction)(void(*)(void)) Blkid_known_fstype, METH_VARARGS|METH_KEYWORDS, Blkid_known_fstype__doc__},
@@ -375,6 +428,8 @@ static PyMethodDef BlkidMethods[] = {
     {"safe_string", (PyCFunction)(void(*)(void)) Blkid_safe_string, METH_VARARGS|METH_KEYWORDS, Blkid_safe_string__doc__},
     {"partition_types", (PyCFunction) Blkid_partition_types, METH_NOARGS, Blkid_partition_types__doc__},
     {"superblocks", (PyCFunction) Blkid_superblocks, METH_NOARGS, Blkid_superblocks__doc__},
+    {"evaluate_tag", (PyCFunction)(void(*)(void)) Blkid_evaluate_tag, METH_VARARGS|METH_KEYWORDS, Blkid_evaluate_tag__doc__},
+    {"evaluate_spec", (PyCFunction)(void(*)(void)) Blkid_evaluate_spec, METH_VARARGS|METH_KEYWORDS, Blkid_evaluate_spec__doc__},
     {NULL, NULL, 0, NULL}
 };
 

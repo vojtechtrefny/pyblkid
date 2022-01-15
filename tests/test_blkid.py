@@ -77,3 +77,16 @@ class BlkidTestCase(unittest.TestCase):
         encoded_string = blkid.encode_string(string)
         self.assertEqual(safe_string, "aa_aaa")
         self.assertEqual(encoded_string, "aa\\x20aaa")
+
+    def test_tags(self):
+        device = blkid.evaluate_tag("LABEL", "test-ext3")
+        self.assertEqual(device, self.loop_dev)
+
+        device = blkid.evaluate_tag("LABEL", "definitely-not-a-valid-label")
+        self.assertIsNone(device)
+
+        device = blkid.evaluate_spec("LABEL=test-ext3")
+        self.assertEqual(device, self.loop_dev)
+
+        device = blkid.evaluate_spec("LABEL=definitely-not-a-valid-label")
+        self.assertIsNone(device)
