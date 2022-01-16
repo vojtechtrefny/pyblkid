@@ -65,6 +65,11 @@ class BlkidTestCase(unittest.TestCase):
         devpath = blkid.devno_to_devname(devno)
         self.assertEqual(devpath, self.loop_dev)
 
+        # we don't have a partition so let's just ask for the disk name and devno
+        (dname, ddevno) = blkid.devno_to_wholedisk(devno)
+        self.assertEqual(dname, os.path.basename(self.loop_dev))
+        self.assertEqual(ddevno, devno)
+
     def test_safe_encode_string(self):
         string = "aaaaaa"
         safe_string = blkid.safe_string(string)

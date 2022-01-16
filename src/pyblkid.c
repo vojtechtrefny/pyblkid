@@ -133,6 +133,47 @@ static PyObject *Blkid_devno_to_devname (PyObject *self UNUSED, PyObject *args, 
     return ret;
 }
 
+PyDoc_STRVAR(Blkid_devno_to_wholedisk__doc__,
+"devno_to_wholedisk (devno)\n\n"
+"This function uses sysfs to convert the devno device number to the name and devno of the whole disk.");
+static PyObject *Blkid_devno_to_wholedisk (PyObject *self UNUSED, PyObject *args, PyObject *kwargs) {
+    dev_t devno = 0;
+    dev_t diskdevno = 0;
+    char *kwlist[] = { "devno", NULL };
+    char diskname[32];
+    int ret = 0;
+    PyObject *tuple = NULL;
+    PyObject *py_name = NULL;
+    PyObject *py_devno = NULL;
+
+    if (!PyArg_ParseTupleAndKeywords (args, kwargs, "O&:devno_to_wholedisk", kwlist, _Py_Dev_Converter, &devno))
+        return NULL;
+
+    ret = blkid_devno_to_wholedisk (devno, diskname, 32, &diskdevno);
+    if (ret != 0) {
+        PyErr_SetString (PyExc_RuntimeError, "Failed to get whole disk name");
+        return NULL;
+    }
+
+    tuple = PyTuple_New (2);
+
+    py_name = PyUnicode_FromString (diskname);
+    if (py_name == NULL) {
+        Py_INCREF (Py_None);
+        py_name = Py_None;
+    }
+    PyTuple_SetItem (tuple, 0, py_name);
+
+    py_devno = _PyLong_FromDev (diskdevno);
+    if (py_devno == NULL) {
+        Py_INCREF (Py_None);
+        py_devno = Py_None;
+    }
+    PyTuple_SetItem (tuple, 1, py_devno);
+
+    return tuple;
+}
+
 PyDoc_STRVAR(Blkid_parse_version_string__doc__,
 "parse_version_string (version)\n\n"
 "Convert version string (e.g. '2.16.0') to release version code (e.g. '2160').\n");
@@ -419,6 +460,7 @@ static PyMethodDef BlkidMethods[] = {
     {"known_fstype", (PyCFunction)(void(*)(void)) Blkid_known_fstype, METH_VARARGS|METH_KEYWORDS, Blkid_known_fstype__doc__},
     {"send_uevent", (PyCFunction)(void(*)(void)) Blkid_send_uevent, METH_VARARGS|METH_KEYWORDS, Blkid_send_uevent__doc__},
     {"devno_to_devname", (PyCFunction)(void(*)(void)) Blkid_devno_to_devname, METH_VARARGS|METH_KEYWORDS, Blkid_devno_to_devname__doc__},
+    {"devno_to_wholedisk", (PyCFunction)(void(*)(void)) Blkid_devno_to_wholedisk, METH_VARARGS|METH_KEYWORDS, Blkid_devno_to_wholedisk__doc__},
     {"known_pttype", (PyCFunction)(void(*)(void)) Blkid_known_pttype, METH_VARARGS|METH_KEYWORDS, Blkid_known_pttype__doc__},
     {"parse_version_string", (PyCFunction)(void(*)(void)) Blkid_parse_version_string, METH_VARARGS|METH_KEYWORDS, Blkid_parse_version_string__doc__},
     {"get_library_version", (PyCFunction) Blkid_get_library_version, METH_NOARGS, Blkid_get_library_version__doc__},
