@@ -94,8 +94,8 @@ class ProbeTestCase(unittest.TestCase):
         ret = pr.do_safeprobe()
         self.assertTrue(ret)
 
-        # four items should be in the probe now
-        self.assertEqual(len(pr), 4)
+        # three or more items should be in the probe now
+        self.assertGreaterEqual(len(pr), 3)
 
         usage = pr.lookup_value("USAGE")
         self.assertEqual(usage, b"filesystem")
