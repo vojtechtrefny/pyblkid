@@ -769,6 +769,45 @@ static PyGetSetDef Probe_getseters[] = {
     {NULL, NULL, NULL, NULL, NULL}
 };
 
+static Py_ssize_t Probe_len (ProbeObject *self) {
+    int ret = 0;
+
+    ret = blkid_probe_numof_values (self->probe);
+    if (ret < 0)
+        return 0;
+
+    return (Py_ssize_t) ret;
+
+}
+
+static PyObject * Probe_getitem (ProbeObject *self, PyObject *item) {
+    int ret = 0;
+    const char *key = NULL;
+    const char *value = NULL;
+
+    if (!PyUnicode_Check (item)) {
+        PyErr_SetObject(PyExc_KeyError, item);
+        return NULL;
+    }
+
+    key = PyUnicode_AsUTF8 (item);
+
+    ret = blkid_probe_lookup_value (self->probe, key, &value, NULL);
+    if (ret != 0) {
+        PyErr_SetObject (PyExc_KeyError, item);
+        return NULL;
+    }
+
+    return PyBytes_FromString (value);
+}
+
+
+
+PyMappingMethods ProbeMapping = {
+    .mp_length = (lenfunc) Probe_len,
+    .mp_subscript = (binaryfunc) Probe_getitem,
+};
+
 PyTypeObject ProbeType = {
     PyVarObject_HEAD_INIT (NULL, 0)
     .tp_name = "blkid.Probe",
@@ -780,4 +819,5 @@ PyTypeObject ProbeType = {
     .tp_init = (initproc) Probe_init,
     .tp_methods = Probe_methods,
     .tp_getset = Probe_getseters,
+    .tp_as_mapping = &ProbeMapping,
 };

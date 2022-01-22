@@ -88,16 +88,31 @@ class ProbeTestCase(unittest.TestCase):
         pr.enable_superblocks(True)
         pr.set_superblocks_flags(blkid.SUBLKS_TYPE | blkid.SUBLKS_USAGE | blkid.SUBLKS_UUID)
 
+        # not probed yet, len should be 0
+        self.assertEqual(len(pr), 0)
+
         ret = pr.do_safeprobe()
         self.assertTrue(ret)
 
+        # four items should be in the probe now
+        self.assertEqual(len(pr), 4)
+
         usage = pr.lookup_value("USAGE")
+        self.assertEqual(usage, b"filesystem")
+
+        usage = pr["USAGE"]
         self.assertEqual(usage, b"filesystem")
 
         fstype = pr.lookup_value("TYPE")
         self.assertEqual(fstype, b"ext3")
 
+        fstype = pr["TYPE"]
+        self.assertEqual(fstype, b"ext3")
+
         fsuuid = pr.lookup_value("UUID")
+        self.assertEqual(fsuuid, b"35f66dab-477e-4090-a872-95ee0e493ad6")
+
+        fsuuid = pr["UUID"]
         self.assertEqual(fsuuid, b"35f66dab-477e-4090-a872-95ee0e493ad6")
 
     def test_probe_filter_type(self):
