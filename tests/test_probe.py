@@ -90,6 +90,9 @@ class ProbeTestCase(unittest.TestCase):
 
         # not probed yet, len should be 0
         self.assertEqual(len(pr), 0)
+        self.assertFalse(pr.keys())
+        self.assertFalse(pr.values())
+        self.assertFalse(pr.items())
 
         ret = pr.do_safeprobe()
         self.assertTrue(ret)
@@ -114,6 +117,21 @@ class ProbeTestCase(unittest.TestCase):
 
         fsuuid = pr["UUID"]
         self.assertEqual(fsuuid, b"35f66dab-477e-4090-a872-95ee0e493ad6")
+
+        keys = pr.keys()
+        self.assertIn("USAGE", keys)
+        self.assertIn("TYPE", keys)
+        self.assertIn("UUID", keys)
+
+        values = pr.values()
+        self.assertIn("filesystem", values)
+        self.assertIn("ext3", values)
+        self.assertIn("35f66dab-477e-4090-a872-95ee0e493ad6", values)
+
+        items = pr.items()
+        self.assertIn(("USAGE", "filesystem"), items)
+        self.assertIn(("TYPE", "ext3"), items)
+        self.assertIn(("UUID", "35f66dab-477e-4090-a872-95ee0e493ad6"), items)
 
     def test_probe_filter_type(self):
         pr = blkid.Probe()

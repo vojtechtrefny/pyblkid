@@ -640,6 +640,89 @@ static PyObject *Probe_do_wipe (ProbeObject *self, PyObject *args, PyObject *kwa
     Py_RETURN_NONE;
 }
 
+static PyObject * probe_to_dict (ProbeObject *self) {
+    PyObject *dict = NULL;
+    int ret = 0;
+    int nvalues = 0;
+    const char *name = NULL;
+    const char *value = NULL;
+    PyObject *py_value = NULL;
+
+    ret = blkid_probe_numof_values (self->probe);
+    if (ret < 0) {
+        PyErr_SetString (PyExc_RuntimeError, "Failed to get probe results");
+        return NULL;
+    }
+    nvalues = ret;
+
+    dict = PyDict_New ();
+    if (!dict) {
+        PyErr_NoMemory ();
+        return NULL;
+    }
+
+    for (int i = 0; i < nvalues; i++) {
+        ret = blkid_probe_get_value (self->probe, i, &name, &value, NULL);
+        if (ret < 0) {
+            PyErr_SetString (PyExc_RuntimeError, "Failed to get probe results");
+            return NULL;
+        }
+
+        py_value = PyUnicode_FromString (value);
+        if (py_value == NULL) {
+            Py_INCREF (Py_None);
+            py_value = Py_None;
+        }
+
+        PyDict_SetItemString (dict, name, py_value);
+        Py_DECREF (py_value);
+    }
+
+    return dict;
+}
+
+PyDoc_STRVAR(Probe_items__doc__,
+"items ()\n");
+static PyObject *Probe_items (ProbeObject *self, PyObject *Py_UNUSED (ignored)) {
+    PyObject *dict = probe_to_dict (self);
+
+    if (PyErr_Occurred ())
+        return NULL;
+
+    PyObject *ret = PyDict_Items (dict);
+    PyDict_Clear (dict);
+
+    return ret;
+}
+
+PyDoc_STRVAR(Probe_values__doc__,
+"values ()\n");
+static PyObject *Probe_values (ProbeObject *self, PyObject *Py_UNUSED (ignored)) {
+    PyObject *dict = probe_to_dict (self);
+
+    if (PyErr_Occurred ())
+        return NULL;
+
+    PyObject *ret = PyDict_Values (dict);
+    PyDict_Clear (dict);
+
+    return ret;
+}
+
+PyDoc_STRVAR(Probe_keys__doc__,
+"keys ()\n");
+static PyObject *Probe_keys (ProbeObject *self, PyObject *Py_UNUSED (ignored)) {
+    PyObject *dict = probe_to_dict (self);
+
+    if (PyErr_Occurred ())
+        return NULL;
+
+    PyObject *ret = PyDict_Keys (dict);
+    PyDict_Clear (dict);
+
+    return ret;
+}
+
 static PyMethodDef Probe_methods[] = {
     {"set_device", (PyCFunction)(void(*)(void)) Probe_set_device, METH_VARARGS|METH_KEYWORDS, Probe_set_device__doc__},
     {"do_safeprobe", (PyCFunction) Probe_do_safeprobe, METH_NOARGS, Probe_do_safeprobe__doc__},
@@ -663,6 +746,9 @@ static PyMethodDef Probe_methods[] = {
     {"invert_superblocks_filter", (PyCFunction) Probe_invert_superblocks_filter, METH_NOARGS, Probe_invert_superblocks_filter__doc__},
     {"reset_superblocks_filter", (PyCFunction) Probe_reset_superblocks_filter, METH_NOARGS, Probe_reset_superblocks_filter__doc__},
     {"lookup_value", (PyCFunction)(void(*)(void)) Probe_lookup_value, METH_VARARGS|METH_KEYWORDS, Probe_lookup_value__doc__},
+    {"items", (PyCFunction) Probe_items, METH_NOARGS, Probe_items__doc__},
+    {"values", (PyCFunction) Probe_values, METH_NOARGS, Probe_values__doc__},
+    {"keys", (PyCFunction) Probe_keys, METH_NOARGS, Probe_keys__doc__},
     {NULL, NULL, 0, NULL}
 };
 
