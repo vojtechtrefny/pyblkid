@@ -287,6 +287,7 @@ static PyObject *Device_get_tags (DeviceObject *self, PyObject *Py_UNUSED (ignor
         }
 
         PyDict_SetItemString (dict, type, py_value);
+        Py_DECREF (py_value);
     }
     blkid_tag_iterate_end(iter);
 
