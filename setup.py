@@ -36,6 +36,7 @@ def main():
           long_description_content_type="text/markdown",
           author="Vojtech Trefny",
           author_email="vtrefny@redhat.com",
+          url="http://github.com/vojtechtrefny/pyblkid",
           ext_modules=[Extension("blkid",
                                  sources = ["src/pyblkid.c",
                                             "src/topology.c",
