@@ -1,5 +1,7 @@
 # pylibblkid
 
+[![PyPI version](https://badge.fury.io/py/pylibblkid.svg)](https://badge.fury.io/py/pylibblkid)
+
 Python bindings for libblkid library.
 
 ```python
