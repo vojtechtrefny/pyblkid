@@ -1,0 +1,5 @@
+include LICENSE README.md
+include MANIFEST.in
+include Makefile
+recursive-include src *.h
+recursive-include tests *.py

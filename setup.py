@@ -24,10 +24,16 @@ if pkgconfig.installed("blkid", ">= 2.36"):
     macros.append(("HAVE_BLKID2360", "1"))
 
 
+with open("README.md", "r") as f:
+    long_description = f.read()
+
+
 def main():
     setup(name="pyblkid",
-          version="0.1",
+          version="0.2",
           description="Python interface for the libblkid C library",
+          long_description=long_description,
+          long_description_content_type="text/markdown",
           author="Vojtech Trefny",
           author_email="vtrefny@redhat.com",
           ext_modules=[Extension("blkid",
@@ -40,7 +46,14 @@ def main():
                                  libraries = ["blkid"],
                                  library_dirs = ["/usr/lib"],
                                  define_macros=macros,
-                                 extra_compile_args = ["-Wall", "-Wextra", "-Werror"])])
+                                 extra_compile_args = ["-Wall", "-Wextra", "-Werror"])],
+          install_requires=["pkgconfig"],
+          classifiers=["Development Status :: 3 - Alpha",
+                       "Intended Audience :: Developers",
+                       "License :: OSI Approved :: GNU General Public License v2 or later (GPLv2+)",
+                       "Programming Language :: C",
+                       "Programming Language :: Python :: 3",
+                       "Operating System :: POSIX :: Linux"])
 
 if __name__ == "__main__":
     main()
