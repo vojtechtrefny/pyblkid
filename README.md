@@ -1,8 +1,10 @@
-# pyblkid
+# pylibblkid
 
 Python bindings for libblkid library.
 
 ```python
+import blkid
+
 pr = blkid.Probe()
 pr.set_device("/dev/sda1")
 

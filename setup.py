@@ -29,7 +29,7 @@ with open("README.md", "r") as f:
 
 
 def main():
-    setup(name="pyblkid",
+    setup(name="pylibblkid",
           version="0.2",
           description="Python interface for the libblkid C library",
           long_description=long_description,
