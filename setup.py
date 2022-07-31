@@ -49,9 +49,9 @@ def main():
                                  define_macros=macros,
                                  extra_compile_args = ["-Wall", "-Wextra", "-Werror"])],
           install_requires=["pkgconfig"],
-          classifiers=["Development Status :: 3 - Alpha",
+          classifiers=["Development Status :: 4 - Beta",
                        "Intended Audience :: Developers",
-                       "License :: OSI Approved :: GNU General Public License v2 or later (GPLv2+)",
+                       "License :: OSI Approved :: GNU Lesser General Public License v2 or later (LGPLv2+)",
                        "Programming Language :: C",
                        "Programming Language :: Python :: 3",
                        "Operating System :: POSIX :: Linux"])
