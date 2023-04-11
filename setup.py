@@ -23,6 +23,12 @@ except Exception:
 from setuptools import setup, Extension
 
 
+pkgs = pkgconfig.list_all()
+if "blkid" not in pkgs:
+    print("Please install libblkid-dev or libblkid-devel")
+    exit(1)
+
+
 macros = []
 
 if pkgconfig.installed("blkid", ">= 2.36"):
