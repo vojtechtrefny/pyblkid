@@ -15,12 +15,18 @@
 
 import pkgconfig
 
+import sys
 from setuptools import setup, Extension
 
 
 pkgs = pkgconfig.list_all()
 if "blkid" not in pkgs:
     print("Please install libblkid-dev or libblkid-devel")
+    exit(1)
+
+vers = sys.version_info
+if f"python-{vers.major}.{vers.minor}" not in pkgs:
+    print("Please install python3-dev or python3-devel")
     exit(1)
 
 
