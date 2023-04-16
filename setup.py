@@ -48,7 +48,6 @@ def main():
                                  library_dirs = ["/usr/lib"],
                                  define_macros=macros,
                                  extra_compile_args = ["-Wall", "-Wextra", "-Werror"])],
-          install_requires=["pkgconfig"],
           classifiers=["Development Status :: 4 - Beta",
                        "Intended Audience :: Developers",
                        "License :: OSI Approved :: GNU Lesser General Public License v2 or later (LGPLv2+)",
