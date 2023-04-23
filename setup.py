@@ -15,7 +15,19 @@
 
 import pkgconfig
 
+import sys
 from setuptools import setup, Extension
+
+
+pkgs = pkgconfig.list_all()
+if "blkid" not in pkgs:
+    print("Please install libblkid-dev or libblkid-devel")
+    exit(1)
+
+vers = sys.version_info
+if f"python-{vers.major}.{vers.minor}" not in pkgs:
+    print("Please install python3-dev or python3-devel")
+    exit(1)
 
 
 macros = []
@@ -48,7 +60,6 @@ def main():
                                  library_dirs = ["/usr/lib"],
                                  define_macros=macros,
                                  extra_compile_args = ["-Wall", "-Wextra", "-Werror"])],
-          install_requires=["pkgconfig"],
           classifiers=["Development Status :: 4 - Beta",
                        "Intended Audience :: Developers",
                        "License :: OSI Approved :: GNU Lesser General Public License v2 or later (LGPLv2+)",
