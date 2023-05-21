@@ -13,11 +13,10 @@
 # You should have received a copy of the GNU Lesser General Public
 # License along with this library; if not, see <http://www.gnu.org/licenses/>.
 
-import pkgconfig
-
 import sys
-from setuptools import setup, Extension
 
+import pkgconfig
+from setuptools import Extension, setup
 
 pkgs = pkgconfig.list_all()
 if "blkid" not in pkgs:
@@ -30,10 +29,17 @@ if f"python-{vers.major}.{vers.minor}" not in pkgs:
     exit(1)
 
 
+# define macros for blkid releases
 macros = []
-
-if pkgconfig.installed("blkid", ">= 2.36"):
-    macros.append(("HAVE_BLKID2360", "1"))
+blkid_releases = ['2.24', '2.25', '2.30', '2.31', '2.36', '2.37', '2.39']
+for blkid_ver in blkid_releases:
+    if pkgconfig.installed("blkid", f">= {blkid_ver}"):
+        ver_list = blkid_ver.split('.')
+        full_release = '_'.join(ver_list)
+        macros.append((f"HAVE_BLKID_{full_release}", "1"))
+        if len(ver_list) > 2:
+            major_minor = '_'.join(ver_list[:2])
+            macros.append((f"HAVE_BLKID_{major_minor}", "1"))
 
 
 with open("README.md", "r") as f:
@@ -50,22 +56,23 @@ def main():
           author_email="vtrefny@redhat.com",
           url="http://github.com/vojtechtrefny/pyblkid",
           ext_modules=[Extension("blkid",
-                                 sources = ["src/pyblkid.c",
-                                            "src/topology.c",
-                                            "src/partitions.c",
-                                            "src/cache.c",
-                                            "src/probe.c",],
-                                 include_dirs = ["/usr/include"],
-                                 libraries = ["blkid"],
-                                 library_dirs = ["/usr/lib"],
+                                 sources=["src/pyblkid.c",
+                                          "src/topology.c",
+                                          "src/partitions.c",
+                                          "src/cache.c",
+                                          "src/probe.c",],
+                                 include_dirs=["/usr/include"],
+                                 libraries=["blkid"],
+                                 library_dirs=["/usr/lib"],
                                  define_macros=macros,
-                                 extra_compile_args = ["-std=c99", "-Wall", "-Wextra", "-Werror"])],
+                                 extra_compile_args=["-std=c99", "-Wall", "-Wextra", "-Werror"])],
           classifiers=["Development Status :: 4 - Beta",
                        "Intended Audience :: Developers",
                        "License :: OSI Approved :: GNU Lesser General Public License v2 or later (LGPLv2+)",
                        "Programming Language :: C",
                        "Programming Language :: Python :: 3",
                        "Operating System :: POSIX :: Linux"])
+
 
 if __name__ == "__main__":
     main()
