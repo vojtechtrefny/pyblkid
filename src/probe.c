@@ -786,6 +786,7 @@ static PyObject *Probe_get_sector_size (ProbeObject *self, PyObject *Py_UNUSED (
     return PyLong_FromUnsignedLong (sector_size);
 }
 
+#ifdef HAVE_BLKID_2_30
 static int Probe_set_sector_size (ProbeObject *self, PyObject *value, void *closure UNUSED) {
 	unsigned int sector_size = 0;
     int ret = 0;
@@ -806,6 +807,7 @@ static int Probe_set_sector_size (ProbeObject *self, PyObject *value, void *clos
 
     return 0;
 }
+#endif
 
 static PyObject *Probe_get_wholedisk_devno (ProbeObject *self, PyObject *Py_UNUSED (ignored)) {
     dev_t devno = blkid_probe_get_wholedisk_devno (self->probe);
@@ -847,7 +849,11 @@ static PyGetSetDef Probe_getseters[] = {
     {"offset", (getter) Probe_get_offset, NULL, "offset of probing area as defined by Probe.set_device() or -1 in case of error", NULL},
     {"sectors", (getter) Probe_get_sectors, NULL, "512-byte sector count or -1 in case of error", NULL},
     {"size", (getter) Probe_get_size, NULL, "size of probing area as defined by Probe.set_device()", NULL},
+#ifdef HAVE_BLKID_2_30
     {"sector_size", (getter) Probe_get_sector_size, (setter) Probe_set_sector_size, "block device logical sector size (BLKSSZGET ioctl, default 512).", NULL},
+#else
+    {"sector_size", (getter) Probe_get_sector_size, NULL, "block device logical sector size (BLKSSZGET ioctl, default 512).", NULL},
+#endif
     {"wholedisk_devno", (getter) Probe_get_wholedisk_devno, NULL, "device number of the wholedisk, or 0 for regular files", NULL},
     {"is_wholedisk", (getter) Probe_get_is_wholedisk, NULL, "True if the device is whole-disk, False otherwise", NULL},
     {"topology", (getter) Probe_get_topology, NULL, "binary interface for topology values", NULL},
