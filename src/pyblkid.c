@@ -523,7 +523,9 @@ PyMODINIT_FUNC PyInit_blkid (void) {
     PyModule_AddIntConstant (module, "PARTS_FORCE_GPT", BLKID_PARTS_FORCE_GPT);
     PyModule_AddIntConstant (module, "PARTS_MAGIC", BLKID_PARTS_MAGIC);
 
+#ifdef HAVE_BLKID_2_24
     PyModule_AddIntConstant (module, "SUBLKS_BADCSUM", BLKID_SUBLKS_BADCSUM);
+#endif
     PyModule_AddIntConstant (module, "SUBLKS_DEFAULT", BLKID_SUBLKS_DEFAULT);
     PyModule_AddIntConstant (module, "SUBLKS_LABEL", BLKID_SUBLKS_LABEL);
     PyModule_AddIntConstant (module, "SUBLKS_LABELRAW", BLKID_SUBLKS_LABELRAW);
