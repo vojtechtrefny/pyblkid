@@ -59,7 +59,7 @@ def main():
                                  libraries = ["blkid"],
                                  library_dirs = ["/usr/lib"],
                                  define_macros=macros,
-                                 extra_compile_args = ["-Wall", "-Wextra", "-Werror"])],
+                                 extra_compile_args = ["-std=c99", "-Wall", "-Wextra", "-Werror"])],
           classifiers=["Development Status :: 4 - Beta",
                        "Intended Audience :: Developers",
                        "License :: OSI Approved :: GNU Lesser General Public License v2 or later (LGPLv2+)",
