@@ -62,7 +62,9 @@ class ProbeTestCase(unittest.TestCase):
         usage = pr.lookup_value("USAGE")
         self.assertEqual(usage, b"filesystem")
 
-        pr.reset_buffers()
+        if hasattr(pr, "reset_buffers"):
+            pr.reset_buffers()
+
         pr.step_back()
         ret = pr.do_probe()
         self.assertTrue(ret)
@@ -70,9 +72,10 @@ class ProbeTestCase(unittest.TestCase):
         usage = pr.lookup_value("USAGE")
         self.assertEqual(usage, b"filesystem")
 
-        offset = pr.lookup_value("SBMAGIC_OFFSET")
-        magic = pr.lookup_value("SBMAGIC")
-        pr.hide_range(int(offset), len(magic))
+        if hasattr(pr, "hide_range"):
+            offset = pr.lookup_value("SBMAGIC_OFFSET")
+            magic = pr.lookup_value("SBMAGIC")
+            pr.hide_range(int(offset), len(magic))
 
         pr.step_back()
         ret = pr.do_probe()

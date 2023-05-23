@@ -552,6 +552,7 @@ static PyObject *Probe_step_back (ProbeObject *self, PyObject *Py_UNUSED (ignore
     Py_RETURN_NONE;
 }
 
+#ifdef HAVE_BLKID_2_31
 PyDoc_STRVAR(Probe_reset_buffers__doc__,
 "reset_buffers ()\n\n"
 "libblkid reuse all already read buffers from the device. The buffers may be modified by Probe.hide_range().\n"
@@ -567,6 +568,7 @@ static PyObject *Probe_reset_buffers (ProbeObject *self, PyObject *Py_UNUSED (ig
 
     Py_RETURN_NONE;
 }
+#endif
 
 PyDoc_STRVAR(Probe_reset_probe__doc__,
 "reset_probe ()\n\n"
@@ -588,6 +590,7 @@ static PyObject *Probe_reset_probe (ProbeObject *self, PyObject *Py_UNUSED (igno
     Py_RETURN_NONE;
 }
 
+#ifdef HAVE_BLKID_2_31
 PyDoc_STRVAR(Probe_hide_range__doc__,
 "hide_range (offset, length)\n\n" \
 "This function modifies in-memory cached data from the device. The specified range is zeroized. "
@@ -613,6 +616,7 @@ static PyObject *Probe_hide_range (ProbeObject *self, PyObject *args, PyObject *
 
     Py_RETURN_NONE;
 }
+#endif
 
 PyDoc_STRVAR(Probe_do_wipe__doc__,
 "do_wipe (dryrun=False)\n\n"
@@ -729,9 +733,13 @@ static PyMethodDef Probe_methods[] = {
     {"do_fullprobe", (PyCFunction) Probe_do_fullprobe, METH_NOARGS, Probe_do_fullprobe__doc__},
     {"do_probe", (PyCFunction) Probe_do_probe, METH_NOARGS, Probe_do_probe__doc__},
     {"step_back", (PyCFunction) Probe_step_back, METH_NOARGS, Probe_step_back__doc__},
+#ifdef HAVE_BLKID_2_31
     {"reset_buffers", (PyCFunction) Probe_reset_buffers, METH_NOARGS, Probe_reset_buffers__doc__},
+#endif
     {"reset_probe", (PyCFunction) Probe_reset_probe, METH_NOARGS, Probe_reset_probe__doc__},
+#ifdef HAVE_BLKID_2_31
     {"hide_range", (PyCFunction)(void(*)(void)) Probe_hide_range, METH_VARARGS|METH_KEYWORDS, Probe_hide_range__doc__},
+#endif
     {"do_wipe", (PyCFunction)(void(*)(void)) Probe_do_wipe, METH_VARARGS|METH_KEYWORDS, Probe_do_wipe__doc__},
     {"enable_partitions", (PyCFunction)(void(*)(void)) Probe_enable_partitions, METH_VARARGS|METH_KEYWORDS, Probe_enable_partitions__doc__},
     {"set_partitions_flags", (PyCFunction)(void(*)(void)) Probe_set_partitions_flags, METH_VARARGS|METH_KEYWORDS, Probe_set_partitions_flags__doc__},
