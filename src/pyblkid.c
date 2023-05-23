@@ -362,6 +362,7 @@ static PyObject *Blkid_safe_string (PyObject *self UNUSED, PyObject *args, PyObj
     return py_ret;
 }
 
+#ifdef HAVE_BLKID_2_30
 PyDoc_STRVAR(Blkid_partition_types__doc__,
 "partition_types ()\n\n"
 "List of supported partition types.\n");
@@ -381,6 +382,7 @@ static PyObject *Blkid_partition_types (ProbeObject *self UNUSED, PyObject *Py_U
 
     return ret;
 }
+#endif
 
 PyDoc_STRVAR(Blkid_superblocks__doc__,
 "superblocks ()\n\n"
@@ -468,7 +470,9 @@ static PyMethodDef BlkidMethods[] = {
     {"get_dev_size", (PyCFunction)(void(*)(void)) Blkid_get_dev_size, METH_VARARGS|METH_KEYWORDS, Blkid_get_dev_size__doc__},
     {"encode_string", (PyCFunction)(void(*)(void)) Blkid_encode_string, METH_VARARGS|METH_KEYWORDS, Blkid_encode_string__doc__},
     {"safe_string", (PyCFunction)(void(*)(void)) Blkid_safe_string, METH_VARARGS|METH_KEYWORDS, Blkid_safe_string__doc__},
+#ifdef HAVE_BLKID_2_30
     {"partition_types", (PyCFunction) Blkid_partition_types, METH_NOARGS, Blkid_partition_types__doc__},
+#endif
     {"superblocks", (PyCFunction) Blkid_superblocks, METH_NOARGS, Blkid_superblocks__doc__},
     {"evaluate_tag", (PyCFunction)(void(*)(void)) Blkid_evaluate_tag, METH_VARARGS|METH_KEYWORDS, Blkid_evaluate_tag__doc__},
     {"evaluate_spec", (PyCFunction)(void(*)(void)) Blkid_evaluate_spec, METH_VARARGS|METH_KEYWORDS, Blkid_evaluate_spec__doc__},
@@ -523,7 +527,9 @@ PyMODINIT_FUNC PyInit_blkid (void) {
     PyModule_AddIntConstant (module, "PARTS_FORCE_GPT", BLKID_PARTS_FORCE_GPT);
     PyModule_AddIntConstant (module, "PARTS_MAGIC", BLKID_PARTS_MAGIC);
 
+#ifdef HAVE_BLKID_2_24
     PyModule_AddIntConstant (module, "SUBLKS_BADCSUM", BLKID_SUBLKS_BADCSUM);
+#endif
     PyModule_AddIntConstant (module, "SUBLKS_DEFAULT", BLKID_SUBLKS_DEFAULT);
     PyModule_AddIntConstant (module, "SUBLKS_LABEL", BLKID_SUBLKS_LABEL);
     PyModule_AddIntConstant (module, "SUBLKS_LABELRAW", BLKID_SUBLKS_LABELRAW);

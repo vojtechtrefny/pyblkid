@@ -118,6 +118,7 @@ static PyObject *Partlist_get_partition (PartlistObject *self, PyObject *args, P
     return (PyObject *) result;
 }
 
+#ifdef HAVE_BLKID_2_25
 PyDoc_STRVAR(Partlist_get_partition_by_partno__doc__,
 "get_partition_by_partno(number)\n\n"
 "Get partition by partition number.\n\n"
@@ -151,6 +152,7 @@ static PyObject *Partlist_get_partition_by_partno (PartlistObject *self, PyObjec
 
     return (PyObject *) result;
 }
+#endif
 
 static int _Py_Dev_Converter (PyObject *obj, void *p) {
 #ifdef HAVE_LONG_LONG
@@ -202,7 +204,9 @@ static PyObject *Partlist_devno_to_partition (PartlistObject *self, PyObject *ar
 
 static PyMethodDef Partlist_methods[] = {
     {"get_partition", (PyCFunction)(void(*)(void)) Partlist_get_partition, METH_VARARGS|METH_KEYWORDS, Partlist_get_partition__doc__},
+#ifdef HAVE_BLKID_2_25
     {"get_partition_by_partno", (PyCFunction)(void(*)(void)) Partlist_get_partition_by_partno, METH_VARARGS|METH_KEYWORDS, Partlist_get_partition_by_partno__doc__},
+#endif
     {"devno_to_partition", (PyCFunction)(void(*)(void)) Partlist_devno_to_partition, METH_VARARGS|METH_KEYWORDS, Partlist_devno_to_partition__doc__},
     {NULL, NULL, 0, NULL},
 };
