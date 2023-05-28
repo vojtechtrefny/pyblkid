@@ -17,6 +17,8 @@ class ProbeTestCase(unittest.TestCase):
         test_dir = os.path.abspath(os.path.dirname(__file__))
         cls.loop_dev = utils.loop_setup(os.path.join(test_dir, cls.test_image))
 
+        cls.ver_code, _version, _date = blkid.get_library_version()
+
     @classmethod
     def tearDownClass(cls):
         if cls.loop_dev:
@@ -37,8 +39,12 @@ class ProbeTestCase(unittest.TestCase):
 
         self.assertTrue(pr.is_wholedisk)
 
-        pr.sector_size = 4096
-        self.assertEqual(pr.sector_size, 4096)
+        if self.ver_code >= 2300:
+            pr.sector_size = 4096
+            self.assertEqual(pr.sector_size, 4096)
+        else:
+            with self.assertRaises(AttributeError):
+                pr.sector_size = 4096
 
         pr.reset_probe()
 
@@ -77,12 +83,12 @@ class ProbeTestCase(unittest.TestCase):
             magic = pr.lookup_value("SBMAGIC")
             pr.hide_range(int(offset), len(magic))
 
-        pr.step_back()
-        ret = pr.do_probe()
-        self.assertFalse(ret)
+            pr.step_back()
+            ret = pr.do_probe()
+            self.assertFalse(ret)
 
-        with self.assertRaises(RuntimeError):
-            usage = pr.lookup_value("USAGE")
+            with self.assertRaises(RuntimeError):
+                usage = pr.lookup_value("USAGE")
 
     def test_safe_probing(self):
         pr = blkid.Probe()
@@ -239,8 +245,7 @@ class ProbeTestCase(unittest.TestCase):
         self.assertEqual(pr.topology.optimal_io_size, 0)
         self.assertEqual(pr.topology.physical_sector_size, 512)
 
-        code, _version, _date = blkid.get_library_version()
-        if code >= 2360:
+        if self.ver_code >= 2360:
             self.assertFalse(pr.topology.dax)
         else:
             with self.assertRaises(AttributeError):
