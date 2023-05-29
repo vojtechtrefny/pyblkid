@@ -48,7 +48,7 @@ with open("README.md", "r") as f:
 
 def main():
     setup(name="pylibblkid",
-          version="0.2",
+          version="0.3",
           description="Python interface for the libblkid C library",
           long_description=long_description,
           long_description_content_type="text/markdown",
