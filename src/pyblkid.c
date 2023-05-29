@@ -140,7 +140,11 @@ static PyObject *Blkid_devno_to_wholedisk (PyObject *self UNUSED, PyObject *args
     dev_t devno = 0;
     dev_t diskdevno = 0;
     char *kwlist[] = { "devno", NULL };
+#ifdef HAVE_BLKID_2_28
     char diskname[32];
+#else
+    char diskname[PATH_MAX];
+#endif
     int ret = 0;
     PyObject *tuple = NULL;
     PyObject *py_name = NULL;
@@ -149,7 +153,11 @@ static PyObject *Blkid_devno_to_wholedisk (PyObject *self UNUSED, PyObject *args
     if (!PyArg_ParseTupleAndKeywords (args, kwargs, "O&:devno_to_wholedisk", kwlist, _Py_Dev_Converter, &devno))
         return NULL;
 
+#ifdef HAVE_BLKID_2_28
     ret = blkid_devno_to_wholedisk (devno, diskname, 32, &diskdevno);
+#else
+    ret = blkid_devno_to_wholedisk (devno, diskname, PATH_MAX, &diskdevno);
+#endif
     if (ret != 0) {
         PyErr_SetString (PyExc_RuntimeError, "Failed to get whole disk name");
         return NULL;
