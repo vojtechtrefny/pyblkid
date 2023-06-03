@@ -105,6 +105,14 @@ static PyObject *Topology_get_dax (TopologyObject *self, PyObject *Py_UNUSED (ig
 }
 #endif
 
+#ifdef HAVE_BLKID_2_39
+static PyObject *Topology_get_diskseq (TopologyObject *self, PyObject *Py_UNUSED (ignored)) {
+    uint64_t diskseq = blkid_topology_get_diskseq (self->topology);
+
+    return PyLong_FromUnsignedLongLong (diskseq);
+}
+#endif
+
 static PyGetSetDef Topology_getseters[] = {
     {"alignment_offset", (getter) Topology_get_alignment_offset, NULL, "alignment offset in bytes or 0", NULL},
     {"logical_sector_size", (getter) Topology_get_logical_sector_size, NULL, "logical sector size (BLKSSZGET ioctl) in bytes or 0", NULL},
@@ -113,6 +121,9 @@ static PyGetSetDef Topology_getseters[] = {
     {"physical_sector_size", (getter) Topology_get_physical_sector_size, NULL, "logical sector size (BLKSSZGET ioctl) in bytes or 0", NULL},
 #ifdef HAVE_BLKID_2_36
     {"dax", (getter) Topology_get_dax, NULL, "whether DAX is supported or not", NULL},
+#endif
+#ifdef HAVE_BLKID_2_39
+    {"diskseq", (getter) Topology_get_diskseq, NULL, "disk sequence number", NULL},
 #endif
     {NULL, NULL, NULL, NULL, NULL}
 };
