@@ -539,6 +539,9 @@ PyMODINIT_FUNC PyInit_blkid (void) {
     PyModule_AddIntConstant (module, "SUBLKS_BADCSUM", BLKID_SUBLKS_BADCSUM);
 #endif
     PyModule_AddIntConstant (module, "SUBLKS_DEFAULT", BLKID_SUBLKS_DEFAULT);
+#ifdef HAVE_BLKID_2_39
+    PyModule_AddIntConstant (module, "SUBLKS_FSINFO", BLKID_SUBLKS_FSINFO);
+#endif
     PyModule_AddIntConstant (module, "SUBLKS_LABEL", BLKID_SUBLKS_LABEL);
     PyModule_AddIntConstant (module, "SUBLKS_LABELRAW", BLKID_SUBLKS_LABELRAW);
     PyModule_AddIntConstant (module, "SUBLKS_MAGIC", BLKID_SUBLKS_MAGIC);
