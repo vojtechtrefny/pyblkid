@@ -618,6 +618,24 @@ static PyObject *Probe_hide_range (ProbeObject *self, PyObject *args, PyObject *
 }
 #endif
 
+#ifdef HAVE_BLKID_2_40
+PyDoc_STRVAR(Probe_wipe_all__doc__,
+"wipe_all ()\n\n"
+"This function erases all detectable signatures from probe. The probe has to be open in O_RDWR mode. "
+"All other necessary configurations will be enabled automatically.");
+static PyObject *Probe_wipe_all (ProbeObject *self, PyObject *Py_UNUSED (ignored)) {
+    int ret = 0;
+
+    ret = blkid_wipe_all (self->probe);
+    if (ret < 0) {
+        PyErr_SetString (PyExc_RuntimeError, "Failed to probe the device");
+        return NULL;
+    }
+
+    Py_RETURN_NONE;
+}
+#endif
+
 PyDoc_STRVAR(Probe_do_wipe__doc__,
 "do_wipe (dryrun=False)\n\n"
 "This function erases the current signature detected by the probe. The probe has to be open in "
@@ -739,6 +757,9 @@ static PyMethodDef Probe_methods[] = {
     {"reset_probe", (PyCFunction) Probe_reset_probe, METH_NOARGS, Probe_reset_probe__doc__},
 #ifdef HAVE_BLKID_2_31
     {"hide_range", (PyCFunction)(void(*)(void)) Probe_hide_range, METH_VARARGS|METH_KEYWORDS, Probe_hide_range__doc__},
+#endif
+#ifdef HAVE_BLKID_2_40
+    {"wipe_all", (PyCFunction) Probe_wipe_all, METH_NOARGS, Probe_wipe_all__doc__},
 #endif
     {"do_wipe", (PyCFunction)(void(*)(void)) Probe_do_wipe, METH_VARARGS|METH_KEYWORDS, Probe_do_wipe__doc__},
     {"enable_partitions", (PyCFunction)(void(*)(void)) Probe_enable_partitions, METH_VARARGS|METH_KEYWORDS, Probe_enable_partitions__doc__},

@@ -31,7 +31,7 @@ if f"python-{vers.major}.{vers.minor}" not in pkgs:
 
 # define macros for blkid releases
 macros = []
-blkid_releases = ['2.24', '2.25', '2.30', '2.31', '2.36', '2.37', '2.39']
+blkid_releases = ['2.24', '2.25', '2.30', '2.31', '2.36', '2.37', '2.39', '2.40']
 for blkid_ver in blkid_releases:
     if pkgconfig.installed("blkid", f">= {blkid_ver}"):
         ver_list = blkid_ver.split('.')
