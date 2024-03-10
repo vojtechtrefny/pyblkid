@@ -33,7 +33,11 @@ def loop_setup(filename):
     return out
 
 
-def loop_teardown(loopdev):
+def loop_teardown(loopdev, filename=None):
     ret, out = run_command("losetup -d %s" % loopdev)
     if ret != 0:
         raise RuntimeError("Failed to detach loop device %s: %s" % (loopdev, out))
+
+    # remove the extracted test file
+    if filename and filename.endswith(".xz") and os.path.exists(filename[:-3]):
+        os.remove(filename[:-3])
