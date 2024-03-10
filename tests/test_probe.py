@@ -50,6 +50,10 @@ class ProbeTestCase(unittest.TestCase):
 
     def test_probing(self):
         pr = blkid.Probe()
+
+        with self.assertRaises(ValueError):
+            pr.do_probe()
+
         pr.set_device(self.loop_dev)
 
         pr.enable_superblocks(True)
