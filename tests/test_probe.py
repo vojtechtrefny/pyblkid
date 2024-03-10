@@ -252,5 +252,37 @@ class ProbeTestCase(unittest.TestCase):
                 self.assertIsNone(pr.topology.dax)
 
 
+@unittest.skipUnless(os.geteuid() == 0, "requires root access")
+class WipeTestCase(unittest.TestCase):
+
+    test_image = "test.img.xz"
+    loop_dev = None
+
+    def setUp(self):
+        test_dir = os.path.abspath(os.path.dirname(__file__))
+        self.loop_dev = utils.loop_setup(os.path.join(test_dir, self.test_image))
+
+    def tearDown(self):
+        test_dir = os.path.abspath(os.path.dirname(__file__))
+        if self.loop_dev:
+            utils.loop_teardown(self.loop_dev,
+                                filename=os.path.join(test_dir, self.test_image))
+
+    def test_wipe(self):
+        pr = blkid.Probe()
+        pr.set_device(self.loop_dev, flags=os.O_RDWR)
+
+        pr.enable_superblocks(True)
+        pr.set_superblocks_flags(blkid.SUBLKS_TYPE | blkid.SUBLKS_USAGE | blkid.SUBLKS_MAGIC)
+
+        while pr.do_probe():
+            pr.do_wipe(False)
+
+        pr.reset_probe()
+
+        ret = pr.do_probe()
+        self.assertFalse(ret)
+
+
 if __name__ == "__main__":
     unittest.main()
