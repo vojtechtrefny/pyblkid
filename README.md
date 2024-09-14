@@ -4,6 +4,9 @@
 
 Python bindings for libblkid library.
 
+## Usage examples
+
+### Probing a device
 ```python
 import blkid
 
@@ -15,6 +18,21 @@ pr.set_superblocks_flags(blkid.SUBLKS_TYPE | blkid.SUBLKS_USAGE | blkid.SUBLKS_U
 
 pr.do_safeprobe()
 
-# print usage
-pr["USAGE"]
+# print device properties as a dictionary
+print(dict(pr))
+```
+
+### Searching for device with specified label
+```python
+import blkid
+
+cache = blkid.Cache()
+cache.probe_all()
+
+dev = cache.find_device("LABEL", "mylabel")
+
+# if found print found device and its properties
+if dev:
+    print(dev.devname)
+    print(dev.tags)
 ```
