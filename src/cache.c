@@ -294,6 +294,27 @@ static PyObject *Device_get_tags (DeviceObject *self, PyObject *Py_UNUSED (ignor
     return (PyObject *) dict;
 }
 
+static PyObject *Device_str (PyObject *self) {
+    char *str = NULL;
+    int ret = 0;
+    PyObject *py_str = NULL;
+    intptr_t id = (intptr_t) self;
+    PyObject *py_name = PyObject_GetAttrString (self, "devname");
+
+    ret = asprintf (&str, "blkid.Device instance (0x%" PRIxPTR "): %s", id, PyUnicode_AsUTF8 (py_name));
+
+    Py_DECREF (py_name);
+
+    if (ret < 0)
+        Py_RETURN_NONE;
+
+    py_str = PyUnicode_FromString (str);
+
+    free (str);
+
+    return py_str;
+}
+
 static PyGetSetDef Device_getseters[] = {
     {"devname", (getter) Device_get_devname, NULL, "returns the name previously used for Cache.get_device.", NULL},
     {"tags", (getter) Device_get_tags, NULL, "returns all tags for this device.", NULL},
@@ -311,4 +332,5 @@ PyTypeObject DeviceType = {
     .tp_init = (initproc) Device_init,
     .tp_methods = Device_methods,
     .tp_getset = Device_getseters,
+    .tp_str = Device_str,
 };
