@@ -416,7 +416,7 @@ static PyObject *Probe_enable_topology (ProbeObject *self, PyObject *args, PyObj
 
 PyDoc_STRVAR(Probe_lookup_value__doc__,
 "lookup_value (name)\n\n" \
-"Assigns the device to probe control struct, resets internal buffers and resets the current probing.");
+"Returns the value of a probing result by name.");
 static PyObject *Probe_lookup_value (ProbeObject *self, PyObject *args, PyObject *kwargs) {
     int ret = 0;
     char *kwlist[] = { "name", NULL };
