@@ -140,7 +140,7 @@ static PyObject *Probe_set_superblocks_flags (ProbeObject *self, PyObject *args,
 
     ret = blkid_probe_set_superblocks_flags (self->probe, flags);
     if (ret != 0) {
-        PyErr_SetString (PyExc_RuntimeError, "Failed to set partition flags");
+        PyErr_SetString (PyExc_RuntimeError, "Failed to set superblock flags");
         return NULL;
     }
 
@@ -297,7 +297,7 @@ static PyObject *Probe_set_partitions_flags (ProbeObject *self, PyObject *args, 
 
     ret = blkid_probe_set_partitions_flags (self->probe, flags);
     if (ret != 0) {
-        PyErr_SetString (PyExc_RuntimeError, "Failed to set superblock flags");
+        PyErr_SetString (PyExc_RuntimeError, "Failed to set partition flags");
         return NULL;
     }
 
@@ -371,7 +371,7 @@ static PyObject *Probe_invert_partitions_filter (ProbeObject *self, PyObject *Py
 
     ret = blkid_probe_invert_partitions_filter (self->probe);
     if (ret != 0) {
-        PyErr_SetString (PyExc_RuntimeError, "Failed to invert superblock probing filter");
+        PyErr_SetString (PyExc_RuntimeError, "Failed to invert partition probing filter");
         return NULL;
     }
 
@@ -386,7 +386,7 @@ static PyObject *Probe_reset_partitions_filter (ProbeObject *self, PyObject *Py_
 
     ret = blkid_probe_reset_partitions_filter (self->probe);
     if (ret != 0) {
-        PyErr_SetString (PyExc_RuntimeError, "Failed to reset superblock probing filter");
+        PyErr_SetString (PyExc_RuntimeError, "Failed to reset partition probing filter");
         return NULL;
     }
 
