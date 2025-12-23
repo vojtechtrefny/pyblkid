@@ -384,8 +384,10 @@ static PyObject *Blkid_partition_types (ProbeObject *self UNUSED, PyObject *Py_U
 
     while (blkid_partitions_get_name (idx++, &name) == 0) {
         py_name = PyUnicode_FromString (name);
-        if (py_name != NULL)
+        if (py_name != NULL) {
             PyList_Append (ret, py_name);
+            Py_DECREF (py_name);
+        }
     }
 
     return ret;
@@ -405,8 +407,10 @@ static PyObject *Blkid_superblocks (ProbeObject *self UNUSED, PyObject *Py_UNUSE
 
     while (blkid_superblocks_get_name (idx++, &name, NULL) == 0) {
         py_name = PyUnicode_FromString (name);
-        if (py_name != NULL)
+        if (py_name != NULL) {
             PyList_Append (ret, py_name);
+            Py_DECREF (py_name);
+        }
     }
 
     return ret;

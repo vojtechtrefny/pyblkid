@@ -140,7 +140,7 @@ static PyObject *Probe_set_superblocks_flags (ProbeObject *self, PyObject *args,
 
     ret = blkid_probe_set_superblocks_flags (self->probe, flags);
     if (ret != 0) {
-        PyErr_SetString (PyExc_RuntimeError, "Failed to set partition flags");
+        PyErr_SetString (PyExc_RuntimeError, "Failed to set superblock flags");
         return NULL;
     }
 
@@ -184,7 +184,9 @@ static PyObject *Probe_filter_superblocks_type (ProbeObject *self, PyObject *arg
     }
 
     for (Py_ssize_t i = 0; i < len; i++) {
-        pystring = PyUnicode_AsEncodedString (PySequence_GetItem (pynames, i), "utf-8", "replace");
+        PyObject *item = PySequence_GetItem (pynames, i);
+        pystring = PyUnicode_AsEncodedString (item, "utf-8", "replace");
+        Py_DECREF (item);
         names[i] = strdup (PyBytes_AsString (pystring));
         Py_DECREF (pystring);
     }
@@ -297,7 +299,7 @@ static PyObject *Probe_set_partitions_flags (ProbeObject *self, PyObject *args, 
 
     ret = blkid_probe_set_partitions_flags (self->probe, flags);
     if (ret != 0) {
-        PyErr_SetString (PyExc_RuntimeError, "Failed to set superblock flags");
+        PyErr_SetString (PyExc_RuntimeError, "Failed to set partition flags");
         return NULL;
     }
 
@@ -341,7 +343,9 @@ static PyObject *Probe_filter_partitions_type (ProbeObject *self, PyObject *args
     }
 
     for (Py_ssize_t i = 0; i < len; i++) {
-        pystring = PyUnicode_AsEncodedString (PySequence_GetItem (pynames, i), "utf-8", "replace");
+        PyObject *item = PySequence_GetItem (pynames, i);
+        pystring = PyUnicode_AsEncodedString (item, "utf-8", "replace");
+        Py_DECREF (item);
         names[i] = strdup (PyBytes_AsString (pystring));
         Py_DECREF (pystring);
     }
@@ -371,7 +375,7 @@ static PyObject *Probe_invert_partitions_filter (ProbeObject *self, PyObject *Py
 
     ret = blkid_probe_invert_partitions_filter (self->probe);
     if (ret != 0) {
-        PyErr_SetString (PyExc_RuntimeError, "Failed to invert superblock probing filter");
+        PyErr_SetString (PyExc_RuntimeError, "Failed to invert partition probing filter");
         return NULL;
     }
 
@@ -386,7 +390,7 @@ static PyObject *Probe_reset_partitions_filter (ProbeObject *self, PyObject *Py_
 
     ret = blkid_probe_reset_partitions_filter (self->probe);
     if (ret != 0) {
-        PyErr_SetString (PyExc_RuntimeError, "Failed to reset superblock probing filter");
+        PyErr_SetString (PyExc_RuntimeError, "Failed to reset partition probing filter");
         return NULL;
     }
 
@@ -416,7 +420,7 @@ static PyObject *Probe_enable_topology (ProbeObject *self, PyObject *args, PyObj
 
 PyDoc_STRVAR(Probe_lookup_value__doc__,
 "lookup_value (name)\n\n" \
-"Assigns the device to probe control struct, resets internal buffers and resets the current probing.");
+"Returns the value of a probing result by name.");
 static PyObject *Probe_lookup_value (ProbeObject *self, PyObject *args, PyObject *kwargs) {
     int ret = 0;
     char *kwlist[] = { "name", NULL };
@@ -619,7 +623,7 @@ static PyObject *Probe_hide_range (ProbeObject *self, PyObject *args, PyObject *
     uint64_t offset = 0;
     uint64_t length = 0;
 
-    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "ii", kwlist, &offset, &length)) {
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "KK", kwlist, &offset, &length)) {
         return NULL;
     }
 
