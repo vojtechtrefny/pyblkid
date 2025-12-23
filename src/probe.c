@@ -619,7 +619,7 @@ static PyObject *Probe_hide_range (ProbeObject *self, PyObject *args, PyObject *
     uint64_t offset = 0;
     uint64_t length = 0;
 
-    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "ii", kwlist, &offset, &length)) {
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "KK", kwlist, &offset, &length)) {
         return NULL;
     }
 
