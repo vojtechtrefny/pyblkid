@@ -184,7 +184,9 @@ static PyObject *Probe_filter_superblocks_type (ProbeObject *self, PyObject *arg
     }
 
     for (Py_ssize_t i = 0; i < len; i++) {
-        pystring = PyUnicode_AsEncodedString (PySequence_GetItem (pynames, i), "utf-8", "replace");
+        PyObject *item = PySequence_GetItem (pynames, i);
+        pystring = PyUnicode_AsEncodedString (item, "utf-8", "replace");
+        Py_DECREF (item);
         names[i] = strdup (PyBytes_AsString (pystring));
         Py_DECREF (pystring);
     }
@@ -341,7 +343,9 @@ static PyObject *Probe_filter_partitions_type (ProbeObject *self, PyObject *args
     }
 
     for (Py_ssize_t i = 0; i < len; i++) {
-        pystring = PyUnicode_AsEncodedString (PySequence_GetItem (pynames, i), "utf-8", "replace");
+        PyObject *item = PySequence_GetItem (pynames, i);
+        pystring = PyUnicode_AsEncodedString (item, "utf-8", "replace");
+        Py_DECREF (item);
         names[i] = strdup (PyBytes_AsString (pystring));
         Py_DECREF (pystring);
     }
