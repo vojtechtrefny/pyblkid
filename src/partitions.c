@@ -328,11 +328,17 @@ static PyMethodDef Parttable_methods[] = {
 static PyObject *Parrtable_get_type (ParttableObject *self, PyObject *Py_UNUSED (ignored)) {
     const char *pttype = blkid_parttable_get_type (self->table);
 
+    if (!pttype)
+        Py_RETURN_NONE;
+
     return PyUnicode_FromString (pttype);
 }
 
 static PyObject *Parrtable_get_id (ParttableObject *self, PyObject *Py_UNUSED (ignored)) {
     const char *ptid = blkid_parttable_get_id (self->table);
+
+    if (!ptid)
+        Py_RETURN_NONE;
 
     return PyUnicode_FromString (ptid);
 }
@@ -401,11 +407,17 @@ static PyObject *Partition_get_type (PartitionObject *self, PyObject *Py_UNUSED 
 static PyObject *Partition_get_type_string (PartitionObject *self, PyObject *Py_UNUSED (ignored)) {
     const char *type = blkid_partition_get_type_string (self->partition);
 
+    if (!type)
+        Py_RETURN_NONE;
+
     return PyUnicode_FromString (type);
 }
 
 static PyObject *Partition_get_uuid (PartitionObject *self, PyObject *Py_UNUSED (ignored)) {
     const char *uuid = blkid_partition_get_uuid (self->partition);
+
+    if (!uuid)
+        Py_RETURN_NONE;
 
     return PyUnicode_FromString (uuid);
 }
@@ -439,6 +451,9 @@ static PyObject *Partition_get_is_primary (PartitionObject *self, PyObject *Py_U
 
 static PyObject *Partition_get_name (PartitionObject *self, PyObject *Py_UNUSED (ignored)) {
     const char *name = blkid_partition_get_name (self->partition);
+
+    if (!name)
+        Py_RETURN_NONE;
 
     return PyUnicode_FromString (name);
 }

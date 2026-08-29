@@ -55,9 +55,11 @@ int Probe_init (ProbeObject *self, PyObject *args UNUSED, PyObject *kwargs UNUSE
 }
 
 void Probe_dealloc (ProbeObject *self) {
-    if (!self->probe)
+    if (!self->probe) {
         /* if init fails */
+        Py_TYPE (self)->tp_free ((PyObject *) self);
         return;
+    }
 
     if (self->fd > 0)
         close (self->fd);
@@ -706,6 +708,7 @@ static PyObject * probe_to_dict (ProbeObject *self) {
         ret = blkid_probe_get_value (self->probe, i, &name, &value, NULL);
         if (ret < 0) {
             PyErr_SetString (PyExc_RuntimeError, "Failed to get probe results");
+            Py_DECREF (dict);
             return NULL;
         }
 
@@ -727,11 +730,11 @@ PyDoc_STRVAR(Probe_items__doc__,
 static PyObject *Probe_items (ProbeObject *self, PyObject *Py_UNUSED (ignored)) {
     PyObject *dict = probe_to_dict (self);
 
-    if (PyErr_Occurred ())
+    if (dict == NULL)
         return NULL;
 
     PyObject *ret = PyDict_Items (dict);
-    PyDict_Clear (dict);
+    Py_DECREF (dict);
 
     return ret;
 }
@@ -741,11 +744,11 @@ PyDoc_STRVAR(Probe_values__doc__,
 static PyObject *Probe_values (ProbeObject *self, PyObject *Py_UNUSED (ignored)) {
     PyObject *dict = probe_to_dict (self);
 
-    if (PyErr_Occurred ())
+    if (dict == NULL)
         return NULL;
 
     PyObject *ret = PyDict_Values (dict);
-    PyDict_Clear (dict);
+    Py_DECREF (dict);
 
     return ret;
 }
@@ -755,11 +758,11 @@ PyDoc_STRVAR(Probe_keys__doc__,
 static PyObject *Probe_keys (ProbeObject *self, PyObject *Py_UNUSED (ignored)) {
     PyObject *dict = probe_to_dict (self);
 
-    if (PyErr_Occurred ())
+    if (dict == NULL)
         return NULL;
 
     PyObject *ret = PyDict_Keys (dict);
-    PyDict_Clear (dict);
+    Py_DECREF (dict);
 
     return ret;
 }

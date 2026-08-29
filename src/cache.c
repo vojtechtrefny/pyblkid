@@ -52,6 +52,9 @@ int Cache_init (CacheObject *self UNUSED, PyObject *args, PyObject *kwargs) {
 }
 
 void Cache_dealloc (CacheObject *self) {
+    if (self->cache)
+        blkid_put_cache (self->cache);
+
     Py_TYPE (self)->tp_free ((PyObject *) self);
 }
 
@@ -189,6 +192,8 @@ static PyObject *Cache_get_devices (CacheObject *self, PyObject *Py_UNUSED (igno
         dev_obj = PyObject_New (DeviceObject, &DeviceType);
         if (!dev_obj) {
             PyErr_NoMemory ();
+            blkid_dev_iterate_end (iter);
+            Py_DECREF (list);
             return NULL;
         }
         dev_obj->device = device;
@@ -299,9 +304,16 @@ static PyObject *Device_str (PyObject *self) {
     int ret = 0;
     PyObject *py_str = NULL;
     intptr_t id = (intptr_t) self;
+    const char *name = NULL;
     PyObject *py_name = PyObject_GetAttrString (self, "devname");
 
-    ret = asprintf (&str, "blkid.Device instance (0x%" PRIxPTR "): %s", id, PyUnicode_AsUTF8 (py_name));
+    if (py_name == NULL)
+        return NULL;
+
+    if (PyUnicode_Check (py_name))
+        name = PyUnicode_AsUTF8 (py_name);
+
+    ret = asprintf (&str, "blkid.Device instance (0x%" PRIxPTR "): %s", id, name ? name : "(none)");
 
     Py_DECREF (py_name);
 
