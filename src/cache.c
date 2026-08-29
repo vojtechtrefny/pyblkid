@@ -192,6 +192,8 @@ static PyObject *Cache_get_devices (CacheObject *self, PyObject *Py_UNUSED (igno
         dev_obj = PyObject_New (DeviceObject, &DeviceType);
         if (!dev_obj) {
             PyErr_NoMemory ();
+            blkid_dev_iterate_end (iter);
+            Py_DECREF (list);
             return NULL;
         }
         dev_obj->device = device;
