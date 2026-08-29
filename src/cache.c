@@ -304,9 +304,16 @@ static PyObject *Device_str (PyObject *self) {
     int ret = 0;
     PyObject *py_str = NULL;
     intptr_t id = (intptr_t) self;
+    const char *name = NULL;
     PyObject *py_name = PyObject_GetAttrString (self, "devname");
 
-    ret = asprintf (&str, "blkid.Device instance (0x%" PRIxPTR "): %s", id, PyUnicode_AsUTF8 (py_name));
+    if (py_name == NULL)
+        return NULL;
+
+    if (PyUnicode_Check (py_name))
+        name = PyUnicode_AsUTF8 (py_name);
+
+    ret = asprintf (&str, "blkid.Device instance (0x%" PRIxPTR "): %s", id, name ? name : "(none)");
 
     Py_DECREF (py_name);
 
