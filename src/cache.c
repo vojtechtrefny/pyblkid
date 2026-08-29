@@ -52,6 +52,9 @@ int Cache_init (CacheObject *self UNUSED, PyObject *args, PyObject *kwargs) {
 }
 
 void Cache_dealloc (CacheObject *self) {
+    if (self->cache)
+        blkid_put_cache (self->cache);
+
     Py_TYPE (self)->tp_free ((PyObject *) self);
 }
 
