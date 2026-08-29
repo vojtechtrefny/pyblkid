@@ -727,11 +727,11 @@ PyDoc_STRVAR(Probe_items__doc__,
 static PyObject *Probe_items (ProbeObject *self, PyObject *Py_UNUSED (ignored)) {
     PyObject *dict = probe_to_dict (self);
 
-    if (PyErr_Occurred ())
+    if (dict == NULL)
         return NULL;
 
     PyObject *ret = PyDict_Items (dict);
-    PyDict_Clear (dict);
+    Py_DECREF (dict);
 
     return ret;
 }
@@ -741,11 +741,11 @@ PyDoc_STRVAR(Probe_values__doc__,
 static PyObject *Probe_values (ProbeObject *self, PyObject *Py_UNUSED (ignored)) {
     PyObject *dict = probe_to_dict (self);
 
-    if (PyErr_Occurred ())
+    if (dict == NULL)
         return NULL;
 
     PyObject *ret = PyDict_Values (dict);
-    PyDict_Clear (dict);
+    Py_DECREF (dict);
 
     return ret;
 }
@@ -755,11 +755,11 @@ PyDoc_STRVAR(Probe_keys__doc__,
 static PyObject *Probe_keys (ProbeObject *self, PyObject *Py_UNUSED (ignored)) {
     PyObject *dict = probe_to_dict (self);
 
-    if (PyErr_Occurred ())
+    if (dict == NULL)
         return NULL;
 
     PyObject *ret = PyDict_Keys (dict);
-    PyDict_Clear (dict);
+    Py_DECREF (dict);
 
     return ret;
 }
