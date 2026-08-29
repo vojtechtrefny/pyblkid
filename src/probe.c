@@ -55,9 +55,11 @@ int Probe_init (ProbeObject *self, PyObject *args UNUSED, PyObject *kwargs UNUSE
 }
 
 void Probe_dealloc (ProbeObject *self) {
-    if (!self->probe)
+    if (!self->probe) {
         /* if init fails */
+        Py_TYPE (self)->tp_free ((PyObject *) self);
         return;
+    }
 
     if (self->fd > 0)
         close (self->fd);
