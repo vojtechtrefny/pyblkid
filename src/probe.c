@@ -706,6 +706,7 @@ static PyObject * probe_to_dict (ProbeObject *self) {
         ret = blkid_probe_get_value (self->probe, i, &name, &value, NULL);
         if (ret < 0) {
             PyErr_SetString (PyExc_RuntimeError, "Failed to get probe results");
+            Py_DECREF (dict);
             return NULL;
         }
 
